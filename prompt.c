@@ -26,20 +26,21 @@ void add_history(char* unused) {}
 int main(int argc, char** argv) {
 
   // print version and instructions
-  puts("Lispy Version 0.0.0.0.1");
+  puts("lisp: by ayyjohn")
+  puts("aLisp Version 0.0.0.0.2");
   puts("Press Ctrl+c to Exit\n");
 
   // infinite repl loop
   while (1) {
 
     // prompt user
-    char* input = readline("lispy> ");
+    char* input = readline("aLisp> ");
 
     // add input to history
     add_history(input);
 
     // echo input
-    printf("No, you're a %s\n", input);
+    printf("input was %s\n", input);
 
     // free retrieved input
     free(input);
