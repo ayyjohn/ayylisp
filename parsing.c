@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+// using quotes means it searches the current directory first
+#include "mpc.h"
 
 // include methods for if we run this on windows
 #ifdef _WIN32
@@ -26,7 +28,7 @@ void add_history(char* unused) {}
 int main(int argc, char** argv) {
 
   // print version and instructions
-  puts("lisp: by ayyjohn")
+  puts("lisp: by ayyjohn");
   puts("aLisp Version 0.0.0.0.2");
   puts("Press Ctrl+c to Exit\n");
 
