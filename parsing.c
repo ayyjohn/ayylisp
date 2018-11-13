@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 // using quotes means it searches the current directory first
 #include "mpc.h"
 
@@ -26,6 +24,21 @@ void add_history(char* unused) {}
 #endif
 
 int main(int argc, char** argv) {
+  // create parsers
+  mpc_parser_t* Number     = mpc_new("number");
+  mpc_parser_t* Operator   = mpc_new("operator");
+  mpc_parser_t* Expression = mpc_new("expression");
+  mpc_parser_t* ALisp      = mpc_new("aLisp");
+
+  // define the parsers with the following language
+  mpca_lang(MPCA_LANG_DEFAULT,
+  "                                                           \
+   number     : /-?[0-9]+/ ;                                  \
+   operator   : '+' | '-' | '*' | '/' ;                       \
+   expression : <number> | '(' <operator> <expression>+ ')' ; \
+   aLisp      : /^/ <operator> <expression>+ /$/ ;            \
+  ",
+  Number, Operator, Expression, ALisp);
 
   // print version and instructions
   puts("lisp: by ayyjohn");
@@ -41,12 +54,23 @@ int main(int argc, char** argv) {
     // add input to history
     add_history(input);
 
-    // echo input
-    printf("input was %s\n", input);
+    // add parsing for user input
+    mpc_result_t r;
+    if (mpc_parse("<stdin>", input, ALisp, &r)) {
+      // on success print the abstract syntax tree
+      mpc_ast_print(r.output);
+      mpc_ast_delete(r.output);
+    } else {
+      // otherwise print the error
+      mpc_err_print(r.error);
+      mpc_err_delete(r.error);
+    }
 
     // free retrieved input
     free(input);
   }
 
+  // clean up parsers
+  mpc_cleanup(4, Number, Operator, Expression, ALisp);
   return 0;
 }
