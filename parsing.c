@@ -33,9 +33,11 @@ enum { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR };
 typedef struct {
   int type;
   long num;
-  /* enums values are represented as strings under the hood */
-  /* so type and err are ints, even though they're enum vals */
-  int err;
+  char* err;
+  char* sym;
+  int count;
+  /* stores a recursive list of lvals */
+  struct lval** cell;
 } lval;
 
 /* constructor for a number type lval */
