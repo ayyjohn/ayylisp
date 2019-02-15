@@ -23,26 +23,94 @@ void add_history(char* unused) {}
 #include<editline/readline.h>
 #endif
 
-long eval_op(long x, char* op, long y) {
-  if (strcmp(op, "+") == 0) { return x + y; }
-  if (strcmp(op, "-") == 0) { return x - y; }
-  if (strcmp(op, "*") == 0) { return x * y; }
-  if (strcmp(op, "/") == 0) { return x / y; }
-  return 0;
+/* create enum of possible errors */
+enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
+
+/* create enum of possible lval types */
+enum { LVAL_NUM, LVAL_ERR };
+
+/* declare lval (list value) structure */
+typedef struct {
+  int type;
+  long num;
+  /* enums values are represented as strings under the hood */
+  /* so type and err are ints, even though they're enum vals */
+  int err;
+} lval;
+
+/* constructor for a number type lval */
+lval lval_num(long x) {
+  lval v;
+  v.type = LVAL_NUM;
+  v.num = x;
+  return v;
 }
 
-long eval(mpc_ast_t* t) {
+/* constructor for an error type lval */
+lval lval_err(int x) {
+  lval v;
+  v.type = LVAL_ERR;
+  /* see above for why v.err is an int */
+  v.err = x;
+  return v;
+}
+
+/* how to print an lval */
+void lval_print(lval v) {
+  switch (v.type) {
+    /* if v is a number, print it */
+    case LVAL_NUM:
+      printf("%li", v.num);
+      break;
+    /* if v is an error print the corresponding error message */
+    case LVAL_ERR:
+      switch (v.err) {
+        case LERR_DIV_ZERO:
+          printf("error: division by zero"); break;
+        case LERR_BAD_OP:
+          printf("error: invalid operator"); break;
+        case LERR_BAD_NUM:
+          printf("Error: invalid number"); break;
+    }
+
+  }
+}
+
+/* println for lvals */
+void lval_println(lval v) { lval_print(v); putchar('\n'); }
+
+lval eval_op(lval x, char* op, lval y) {
+
+  /* if either value is an error, just return it */
+  if (x.type == LVAL_ERR) { return x; }
+  if (y.type == LVAL_ERR) { return y; }
+
+  /* otherwise do math on the values */
+  if (strcmp(op, "+") == 0) { return lval_num(x.num + y.num); }
+  if (strcmp(op, "-") == 0) { return lval_num(x.num - y.num); }
+  if (strcmp(op, "*") == 0) { return lval_num(x.num * y.num); }
+  /* special treatment necessary for division because of infinity */
+  if (strcmp(op, "/") == 0) {
+    return y.num == 0 ? lval_err(LERR_DIV_ZERO) : lval_num(x.num / y.num);
+  }
+  return lval_err(LERR_BAD_OP);
+}
+
+lval eval(mpc_ast_t* t) {
 
   // return numbers immediately
   if(strstr(t->tag, "number")) {
-    return atoi(t->contents);
+    /* check if there's an error in conversion */
+    errno = 0;
+    long x = strtol(t->contents, NULL, 10);
+    return errno != ERANGE ? lval_num(x) : lval_err(LERR_BAD_NUM);
   }
 
   // the operator is always 2nd
   char* op = t->children[1]->contents;
 
   // third child may be either a number or expression
-  long x = eval(t->children[2]);
+  lval x = eval(t->children[2]);
 
   // go through remaining children and evaluate recursively
   int i = 3;
@@ -89,8 +157,8 @@ int main(int argc, char** argv) {
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, ALisp, &r)) {
       // on success print the abstract syntax tree
-      long result = eval(r.output);
-      printf("%li\n", result);
+      lval result = eval(r.output);
+      lval_println(result);
       mpc_ast_delete(r.output);
     } else {
       // otherwise print the error
