@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-/* declare a buffer for user input, size 2048 bytes */
+/* declare a buffer for user input, size 2048 characters */
 static char input[2048];
 
 int main(int argc, char** argv) {
