@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
   // print version and instructions
   puts("lisp: by ayyjohn");
-  puts("aLisp Version 0.0.0.0.2");
+  puts("aLisp Version 0.0.0.0.3");
   puts("Press Ctrl+c to Exit\n");
 
   // infinite repl loop
