@@ -57,6 +57,24 @@ lval* lval_err(char* m) {
   return v;
 }
 
+/* constructor for a pointer to a new symbol type lval */
+lval* lval_sym(char* m) {
+  lval* v = malloc(sizeof(lval));
+  v->type = LVAL_SYM;
+  v->sym = malloc(strlen(s) + 1);
+  srcpy(v-sym, s);
+  return v;
+}
+
+/* constructor for a new, empty S-expression lval */
+lval* lval_sexpr(void) {
+  lval* v = malloc(sizeof(lval));
+  v->type = LVAL_SEXPR;
+  v->count = 0;
+  v->cell = NULL;
+  return v;
+
+}
 /* how to print an lval */
 void lval_print(lval v) {
   switch (v.type) {
