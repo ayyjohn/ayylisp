@@ -125,20 +125,21 @@ lval eval(mpc_ast_t* t) {
 int main(int argc, char** argv) {
   // create parsers
   mpc_parser_t* Number     = mpc_new("number");
-  mpc_parser_t* Operator   = mpc_new("operator");
-  mpc_parser_t* Expression = mpc_new("expression");
+  mpc_parser_t* Symbol     = mpc_new("symbol");
+  mpc_parser_t* Sexpr      = mpc_new("sexpr");
+  mpc_parser_t* Expr       = mpc_new("expr");
   mpc_parser_t* ALisp      = mpc_new("aLisp");
 
   // define the parsers with the following language
   mpca_lang(MPCA_LANG_DEFAULT,
-  "                                                           \
-   number     : /-?[0-9]+/ ;                                  \
-   operator   : '+' | '-' | '*' | '/' ;                       \
-   expression : <number> | '(' <operator> <expression>+ ')' ; \
-   aLisp      : /^/ <operator> <expression>+ /$/ ;            \
+  "                                         \
+   number : /-?[0-9]+/ ;                    \
+   symbol : '+' | '-' | '*' | '/' ;         \
+   sexpr  : '(' <expr>* ')' ;               \
+   expr   : <number> | <symbol> | <sexpr> ; \
+   aLisp  : /^/ <expr>* /$/ ;               \
   ",
-  Number, Operator, Expression, ALisp);
-
+  Number, Symbol, Sexpr, Expr, Alisp); 
   // print version and instructions
   puts("lisp: by ayyjohn");
   puts("aLisp Version 0.0.0.0.3");
@@ -171,6 +172,6 @@ int main(int argc, char** argv) {
   }
 
   // clean up parsers
-  mpc_cleanup(4, Number, Operator, Expression, ALisp);
+  mpc_cleanup(5, Number, Symbol, Sexpr, Expr, ALisp);
   return 0;
 }
