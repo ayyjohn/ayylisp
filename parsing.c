@@ -40,7 +40,7 @@ typedef struct {
   struct lval** cell;
 } lval;
 
-/* constructor for a number type lval */
+/* constructor for a pointer to a number type lval */
 lval* lval_num(long x) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_NUM;
@@ -48,12 +48,12 @@ lval* lval_num(long x) {
   return v;
 }
 
-/* constructor for an error type lval */
-lval lval_err(int x) {
-  lval v;
-  v.type = LVAL_ERR;
-  /* see above for why v.err is an int */
-  v.err = x;
+/* constructor for a pointer to an error type lval */
+lval* lval_err(char* m) {
+  lval* v malloc(sizeof(lval));
+  v->type = LVAL_ERR;
+  v->err = malloc(strlen(m) + 1);
+  strcpy(v->err, m);
   return v;
 }
 
