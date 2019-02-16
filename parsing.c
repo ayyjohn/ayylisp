@@ -50,7 +50,7 @@ lval* lval_num(long x) {
 
 /* constructor for a pointer to an error type lval */
 lval* lval_err(char* m) {
-  lval* v malloc(sizeof(lval));
+  lval* v =  malloc(sizeof(lval));
   v->type = LVAL_ERR;
   v->err = malloc(strlen(m) + 1);
   strcpy(v->err, m);
@@ -58,11 +58,11 @@ lval* lval_err(char* m) {
 }
 
 /* constructor for a pointer to a new symbol type lval */
-lval* lval_sym(char* m) {
+lval* lval_sym(char* s) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_SYM;
   v->sym = malloc(strlen(s) + 1);
-  srcpy(v-sym, s);
+  strcpy(v->sym, s);
   return v;
 }
 
@@ -86,7 +86,7 @@ void lval_del(lval* v) {
   case LVAL_SYM: free(v->sym); break;
     /* delete all lval elements recursively for s-expressions */
   case LVAL_SEXPR:
-    for (int i = 0; i < v-> count; i++) {
+    for (int i = 0; i < v->count; i++) {
       lval_del(v->cell[i]);
     }
     /* also free memory allocated for containing the pointers */
@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
   mpc_parser_t* Symbol     = mpc_new("symbol");
   mpc_parser_t* Sexpr      = mpc_new("sexpr");
   mpc_parser_t* Expr       = mpc_new("expr");
-  mpc_parser_t* ALisp      = mpc_new("aLisp");
+  mpc_parser_t* aLisp      = mpc_new("aLisp");
 
   // define the parsers with the following language
   mpca_lang(MPCA_LANG_DEFAULT,
@@ -222,7 +222,7 @@ int main(int argc, char** argv) {
    expr   : <number> | <symbol> | <sexpr> ; \
    aLisp  : /^/ <expr>* /$/ ;               \
   ",
-  Number, Symbol, Sexpr, Expr, Alisp); 
+  Number, Symbol, Sexpr, Expr, aLisp); 
   // print version and instructions
   puts("lisp: by ayyjohn");
   puts("aLisp Version 0.0.0.0.3");
@@ -239,11 +239,11 @@ int main(int argc, char** argv) {
 
     // add parsing for user input
     mpc_result_t r;
-    if (mpc_parse("<stdin>", input, ALisp, &r)) {
+    if (mpc_parse("<stdin>", input, aLisp, &r)) {
       // on success print the abstract syntax tree
-      lval result = eval(r.output);
-      lval_println(result);
-      mpc_ast_delete(r.output);
+      lval* x = lval_read(r.output);
+      lval_println(x);
+      lval_del(x);
     } else {
       // otherwise print the error
       mpc_err_print(r.error);
@@ -255,6 +255,6 @@ int main(int argc, char** argv) {
   }
 
   // clean up parsers
-  mpc_cleanup(5, Number, Symbol, Sexpr, Expr, ALisp);
+  mpc_cleanup(5, Number, Symbol, Sexpr, Expr, aLisp);
   return 0;
 }
