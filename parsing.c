@@ -30,7 +30,7 @@ enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 enum { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR };
 
 /* declare lval (list value) structure */
-typedef struct {
+typedef struct lval {
   int type;
   long num;
   char* err;
@@ -73,7 +73,6 @@ lval* lval_sexpr(void) {
   v->count = 0;
   v->cell = NULL;
   return v;
-
 }
 
 /* method to delete an lval, depending on type */
