@@ -132,6 +132,7 @@ lval* lval_add(lval* v, lval* x) {
 }
 
 /* forward declare lval print so it can be called from lval_expr_print */
+/* resolves circular dependency */
 void lval_print(lval* v);
 
 void lval_expr_print(lval* v, char open, char close) {
