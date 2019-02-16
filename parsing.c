@@ -112,7 +112,7 @@ lval* lval_read_num(mpc_ast_t* t) {
 lval* lval_read(mpc_ast_t* t) {
   /* if symbol or number return lval of that type */
   if (strstr(t->tag, "number")) { return lval_read_num(t); }
-  if (strstr(t->tag, "number")) { return lval_sym(t->contents); }
+  if (strstr(t->tag, "symbol")) { return lval_sym(t->contents); }
 
   /* if root, or s-expr then create an empty list */
   lval* x = NULL;
@@ -130,7 +130,6 @@ lval* lval_read(mpc_ast_t* t) {
   return x;
 }
 
-
 /* forward declare lval print so it can be called from lval_expr_print */
 /* resolves circular dependency */
 void lval_print(lval* v);
@@ -142,7 +141,7 @@ void lval_expr_print(lval* v, char open, char close) {
     lval_print(v->cell[i]);
 
     /* don't print trailing space if last element */
-    if (i != (v->count - 1)) {
+    if (i != (v->count-1)) {
       putchar(' ');
     }
   }
