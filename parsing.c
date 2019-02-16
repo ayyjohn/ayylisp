@@ -97,6 +97,54 @@ void lval_del(lval* v) {
   free(v);
 }
 
+lval* lval_read_num(mpc_ast_t* t) {
+  errno = 0;
+  long x = strtol(t->contents, NULL, 10);
+  return errno != ERANGE ? lval_num(x) : lval_err("invalid number");
+}
+
+lval* lval_read(mpc_ast_t* t) {
+  /* if symbol or number return lval of that type */
+  if (strstr(t->tag, "number")) { return lval_read_num(t); }
+  if (strstr(t->tag, "number")) { return lval_sym(t->contents); }
+
+  /* if root, or s-expr then create an empty list */
+  lval* x = NULL;
+  if (strcomp(t->tag, ">" == 0)) { x = lval_sexpr(); }
+  if (strstr(t->tag, "sexpr"))   { x = lval_sexpr(); }
+
+  /* fill in the list with any valid expressions that follow */
+  for (int i = 0; i < t->children_num; i++) {
+    if (strcmp(t->children[i]->contents, "(") == 0) { continue; }
+    if (strcmp(t->children[i]->contents, ")") == 0) { continue; }
+    if (strcmp(t->children[i]->tag, "regex") == 0)  { continue; }
+    x = lval_add(x, lval_read(t->children[i]));
+  }
+
+  return x;
+}
+
+lval* lval_add(lval* v, lval* x) {
+  v->count++;
+  v->cell = realloct(v->cell, sizeof(lval*) * v->count);
+  v->cell[v->count-1] = x;
+  return v;
+}
+
+void lval_expr_print(lval* v, char open, char close) {
+  putchar(open);
+  for (int i = 0; i < v->count; i++) {
+    /* print the contained value */
+    lval_print(v->cell[i]);
+
+    /* don't print trailing space if last element */
+    if (i != (v->count - 1)) {
+      putchar(' ');
+    }
+  }
+  putchar(close);
+}
+
 /* how to print an lval */
 void lval_print(lval v) {
   switch (v.type) {
