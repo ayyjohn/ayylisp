@@ -99,7 +99,7 @@ void lval_del(lval* v) {
 
 lval* lval_add(lval* v, lval* x) {
   v->count++;
-  v->cell = realloct(v->cell, sizeof(lval*) * v->count);
+  v->cell = realloc(v->cell, sizeof(lval*) * v->count);
   v->cell[v->count-1] = x;
   return v;
 }
@@ -117,7 +117,7 @@ lval* lval_read(mpc_ast_t* t) {
 
   /* if root, or s-expr then create an empty list */
   lval* x = NULL;
-  if (strcmp(t->tag, ">" == 0)) { x = lval_sexpr(); }
+  if (strcmp(t->tag, ">") == 0)  { x = lval_sexpr(); }
   if (strstr(t->tag, "sexpr"))   { x = lval_sexpr(); }
 
   /* fill in the list with any valid expressions that follow */
