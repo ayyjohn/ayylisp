@@ -23,9 +23,6 @@ void add_history(char* unused) {}
 #include<editline/readline.h>
 #endif
 
-/* create enum of possible errors */
-enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
-
 /* create enum of possible lval types */
 enum { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR };
 
