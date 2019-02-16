@@ -131,6 +131,9 @@ lval* lval_add(lval* v, lval* x) {
   return v;
 }
 
+/* forward declare lval print so it can be called from lval_expr_print */
+void lval_print(lval* v);
+
 void lval_expr_print(lval* v, char open, char close) {
   putchar(open);
   for (int i = 0; i < v->count; i++) {
@@ -147,27 +150,16 @@ void lval_expr_print(lval* v, char open, char close) {
 
 /* how to print an lval */
 void lval_print(lval v) {
-  switch (v.type) {
-    /* if v is a number, print it */
-    case LVAL_NUM:
-      printf("%li", v.num);
-      break;
-    /* if v is an error print the corresponding error message */
-    case LVAL_ERR:
-      switch (v.err) {
-        case LERR_DIV_ZERO:
-          printf("error: division by zero"); break;
-        case LERR_BAD_OP:
-          printf("error: invalid operator"); break;
-        case LERR_BAD_NUM:
-          printf("Error: invalid number"); break;
-    }
-
+  switch (v->type) {
+    case LVAL_NUM:   printf("%li", v->num); break;
+    case LVAL_ERR:   printf("Error: %s", v->err); break;
+    case LVAL_SYM:   printf("%s", v->sym); break;
+    case LVAL_SEXPR: lval_expr_print(v, '(', ')'); break;
   }
 }
 
 /* println for lvals */
-void lval_println(lval v) { lval_print(v); putchar('\n'); }
+void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
 lval eval_op(lval x, char* op, lval y) {
 
