@@ -201,6 +201,7 @@ int main(int argc, char** argv) {
       lval* x = lval_read(r.output);
       lval_println(x);
       lval_del(x);
+      mpc_ast_delete(r.output);
     } else {
       // otherwise print the error
       mpc_err_print(r.error);
