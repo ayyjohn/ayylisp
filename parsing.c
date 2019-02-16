@@ -97,6 +97,13 @@ void lval_del(lval* v) {
   free(v);
 }
 
+lval* lval_add(lval* v, lval* x) {
+  v->count++;
+  v->cell = realloct(v->cell, sizeof(lval*) * v->count);
+  v->cell[v->count-1] = x;
+  return v;
+}
+
 lval* lval_read_num(mpc_ast_t* t) {
   errno = 0;
   long x = strtol(t->contents, NULL, 10);
@@ -110,7 +117,7 @@ lval* lval_read(mpc_ast_t* t) {
 
   /* if root, or s-expr then create an empty list */
   lval* x = NULL;
-  if (strcomp(t->tag, ">" == 0)) { x = lval_sexpr(); }
+  if (strcmp(t->tag, ">" == 0)) { x = lval_sexpr(); }
   if (strstr(t->tag, "sexpr"))   { x = lval_sexpr(); }
 
   /* fill in the list with any valid expressions that follow */
@@ -124,12 +131,6 @@ lval* lval_read(mpc_ast_t* t) {
   return x;
 }
 
-lval* lval_add(lval* v, lval* x) {
-  v->count++;
-  v->cell = realloct(v->cell, sizeof(lval*) * v->count);
-  v->cell[v->count-1] = x;
-  return v;
-}
 
 /* forward declare lval print so it can be called from lval_expr_print */
 /* resolves circular dependency */
@@ -150,7 +151,7 @@ void lval_expr_print(lval* v, char open, char close) {
 }
 
 /* how to print an lval */
-void lval_print(lval v) {
+void lval_print(lval* v) {
   switch (v->type) {
     case LVAL_NUM:   printf("%li", v->num); break;
     case LVAL_ERR:   printf("Error: %s", v->err); break;
