@@ -75,6 +75,28 @@ lval* lval_sexpr(void) {
   return v;
 
 }
+
+/* method to delete an lval, depending on type */
+void lval_del(lval* v) {
+  switch(v->type) {
+  /* do nothing for number type, no malloc calls */
+  case LVAL_NUM: break;
+  /* free string data for errors and symbols */
+  case LVAL_ERR: free(v->err); break;
+  case LVAL_SYM: free(v->sym); break;
+    /* delete all lval elements recursively for s-expressions */
+  case LVAL_SEXPR:
+    for (int i = 0; i < v-> count; i++) {
+      lval_del(v->cell[i]);
+    }
+    /* also free memory allocated for containing the pointers */
+    free(v->cell);
+    break;
+  }
+  /* free memory allocated for the struct itself */
+  free(v);
+}
+
 /* how to print an lval */
 void lval_print(lval v) {
   switch (v.type) {
