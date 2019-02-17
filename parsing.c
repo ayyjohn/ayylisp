@@ -259,11 +259,11 @@ void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
 int main(int argc, char** argv) {
   // create parsers
-  mpc_parser_t* Number     = mpc_new("number");
-  mpc_parser_t* Symbol     = mpc_new("symbol");
-  mpc_parser_t* Sexpr      = mpc_new("sexpr");
-  mpc_parser_t* Expr       = mpc_new("expr");
-  mpc_parser_t* aLisp      = mpc_new("aLisp");
+  mpc_parser_t* Number = mpc_new("number");
+  mpc_parser_t* Symbol = mpc_new("symbol");
+  mpc_parser_t* Sexpr  = mpc_new("sexpr");
+  mpc_parser_t* Expr   = mpc_new("expr");
+  mpc_parser_t* aLisp  = mpc_new("aLisp");
 
   // define the parsers with the following language
   mpca_lang(MPCA_LANG_DEFAULT,
