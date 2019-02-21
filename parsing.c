@@ -72,6 +72,7 @@ lval* lval_sexpr(void) {
   return v;
 }
 
+/* constructor for a new, empty Q-expression lval */
 lval* lval_qexpr(void) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_QEXPR;
