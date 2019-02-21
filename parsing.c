@@ -145,6 +145,10 @@ lval* lval_read(mpc_ast_t* t) {
   return x;
 }
 
+/* macro to verify basic repetitive conditions */
+#define LASSERT(args, cond, err) \
+  if (!cond)) { lval_del(args); return lval_err(err); }
+
 /* forward declare lval print so it can be called from lval_expr_print */
 /* resolves circular dependency */
 void lval_print(lval* v);
