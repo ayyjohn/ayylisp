@@ -226,6 +226,19 @@ lval* builtin_op(lval* a, char* op) {
   return x;
 }
 
+lval* builtin_head(lval* a) {
+  LASSERT(a, a->count == 1,
+          "function 'head' passed too many arguments");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+          "function 'head' passed incorrect type");
+  LASSERT(a, a->cell[0]->count != 0,
+          "function 'head' passed an empty q-expression, {}");
+
+  lval* v = lval_take(a, 0);
+  while (v->count > 1) { lval_del(lval_pop(v, 1)); }
+  return v;
+}
+
 lval* lval_eval(lval* v);
 
 lval* lval_eval_sexpr(lval* v) {
