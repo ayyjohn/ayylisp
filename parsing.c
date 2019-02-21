@@ -227,6 +227,12 @@ lval* builtin_op(lval* a, char* op) {
 }
 
 lval* builtin_head(lval* a) {
+  /*
+    takes in an lval, verifies that it only has one cell, that the cell is
+    a q-expression, and that that q-expression is not empty.
+    if all those conditions are met, returns the first element in the
+    lval and discards the rest
+   */
   LASSERT(a, a->count == 1,
           "function 'head' passed too many arguments");
   LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
@@ -236,6 +242,24 @@ lval* builtin_head(lval* a) {
 
   lval* v = lval_take(a, 0);
   while (v->count > 1) { lval_del(lval_pop(v, 1)); }
+  return v;
+}
+
+lval* builtin_tail(lval* a) {
+  /*
+     takes in an lval, verifies that it only has one cell, that the cell is
+     a q-expression, and that that q-expression is not empty.
+     if all those conditions are met, removes the head of the lval
+     and returns the lval 
+  */
+  LASSERT(a, a->count == 1,
+          "function 'tail' passed too many arguments");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+          "function 'tail' passed incorrect type");
+  LASSERT(a, a->cell[0]->count != 0,
+          "function 'tail' passed an empty q-expression, {}");
+  lval* v = lval_take(a, 0);
+  lval_del(lval_pop(v, 0));
   return v;
 }
 
