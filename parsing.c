@@ -28,10 +28,15 @@ enum { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
 
 /* declare lval (list value) structure */
 typedef struct lval {
+  // stores the type of lval, one of the above enum types
   int type;
+  // stores the number of the lval (if it has one)
   long num;
+  // stores the error of the lval (if it has one)
   char* err;
+  // stores the symbol of the lval (if it has one)
   char* sym;
+  // stores how many lvals are nested in cell
   int count;
   /* stores a recursive list of lvals */
   struct lval** cell;
