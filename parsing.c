@@ -188,6 +188,8 @@ lval* lval_take(lval* v, int i) {
   return x;
 }
 
+lval* lval_eval(lval* v);
+
 lval* builtin_op(lval* a, char* op) {
 
   /* ensure arguments are numbers */
@@ -224,6 +226,44 @@ lval* builtin_op(lval* a, char* op) {
   }
   lval_del(a);
   return x;
+}
+
+lval* lval_eval_sexpr(lval* v) {
+  /* evaluate children */
+  for (int i = 0; i < v->count; i++) {
+    v->cell[i] = lval_eval(v->cell[i]);
+  }
+
+  /* check for errors */
+  for (int i = 0; i < v->count; i++) {
+    if (v->cell[i]->type == LVAL_ERR) { return lval_take(v, i); }
+  }
+
+  /* empty expressions */
+  if (v->count == 0) { return v; }
+
+  /* single expressions */
+  if (v->count == 1) { return lval_take(v, 0); }
+
+  /* ensure the first element is a symbol */
+  lval* f = lval_pop(v, 0);
+  if (f->type != LVAL_SYM) {
+    lval_del(f);
+    lval_del(v);
+    return lval_err("S-expression does not start with a symbol");
+  }
+
+  /* call builtin with operator */
+  lval* result = builtin_op(v, f->sym);
+  lval_del(f);
+  return result;
+}
+
+lval* lval_eval(lval* v) {
+  /* evaluates Sexpressions */
+  if (v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
+  /* all other lval types remain the same */
+  return v;
 }
 
 lval* builtin_head(lval* a) {
@@ -277,46 +317,6 @@ lval* builtin_eval(lval* a) {
   lval* x = lval_take(a, 0);
   x->type = LVAL_SEXPR;
   return lval_eval(x);
-}
-
-lval* lval_eval(lval* v);
-
-lval* lval_eval_sexpr(lval* v) {
-  /* evaluate children */
-  for (int i = 0; i < v->count; i++) {
-    v->cell[i] = lval_eval(v->cell[i]);
-  }
-
-  /* check for errors */
-  for (int i = 0; i < v->count; i++) {
-    if (v->cell[i]->type == LVAL_ERR) { return lval_take(v, i); }
-  }
-
-  /* empty expressions */
-  if (v->count == 0) { return v; }
-
-  /* single expressions */
-  if (v->count == 1) { return lval_take(v, 0); }
-
-  /* ensure the first element is a symbol */
-  lval* f = lval_pop(v, 0);
-  if (f->type != LVAL_SYM) {
-    lval_del(f);
-    lval_del(v);
-    return lval_err("S-expression does not start with a symbol");
-  }
-
-  /* call builtin with operator */
-  lval* result = builtin_op(v, f->sym);
-  lval_del(f);
-  return result;
-}
-
-lval* lval_eval(lval* v) {
-  /* evaluates Sexpressions */
-  if (v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
-  /* all other lval types remain the same */
-  return v;
 }
 
 /* how to print an lval */
