@@ -281,13 +281,14 @@ int main(int argc, char** argv) {
 
   // define the parsers with the following language
   mpca_lang(MPCA_LANG_DEFAULT,
-  "                                                    \
-    number : /-?[0-9]+/ ;                              \
-    symbol : '+' | '-' | '*' | '/' ;                   \
-    sexpr  : '(' <expr>* ')' ;                         \
-    qexpr  : '{' <expr>* '}' ;                         \
-    expr   : <number> | <symbol> | <sexpr> | <qexpr> ; \
-    aLisp  : /^/ <expr>* /$/ ;                         \
+  "                                                        \
+    number : /-?[0-9]+/ ;                                  \
+    symbol : \"list\" | \"head\" | \"tail\"                \
+           | \"join\" | \"eval\" | '+' | '-' | '*' | '/' ; \
+    sexpr  : '(' <expr>* ')' ;                             \
+    qexpr  : '{' <expr>* '}' ;                             \
+    expr   : <number> | <symbol> | <sexpr> | <qexpr> ;     \
+    aLisp  : /^/ <expr>* /$/ ;                             \
   ",
   Number, Symbol, Sexpr, Qexpr, Expr, aLisp); 
   // print version and instructions
