@@ -232,6 +232,25 @@ void lval_print(lval* v) {
 /* println for lvals */
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
+struct lenv {
+  /* track number of entries */
+  /* there should be exactly 1 variable name for each value */
+  /* at the same index */
+  int count;
+  /* list of variable names */
+  char** syms;
+  /* list of values for variable names */
+  lval** vals;
+};
+
+lenv* lenv_new(void) {
+  lenv* e = malloc(sizeof(lenv));
+  e->count = 0;
+  e->syms = NULL;
+  e->vals = NULL;
+  return e;
+}
+
 /* macro to verify basic repetitive conditions */
 #define LASSERT(args, cond, err)                          \
   if (!(cond)) { lval_del(args); return lval_err(err); }
