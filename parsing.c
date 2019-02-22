@@ -51,7 +51,7 @@ struct lval {
   lbuiltin fun;
   /* stores a recursive list of lvals */
   struct lval** cell;
-} lval;
+};
 
 /* constructor for a pointer to a number type lval */
 lval* lval_num(long x) {
