@@ -108,8 +108,10 @@ lval* lval_qexpr(void) {
 /* method to delete an lval, depending on type */
 void lval_del(lval* v) {
   switch(v->type) {
-  /* do nothing for number type, no malloc calls */
+  /* do nothing for number type, no nested malloc calls */
   case LVAL_NUM: break;
+  /* do nothing for function type, no nested malloc calls */
+  case LVAL_FUN: break;
   /* free string data for errors and symbols */
   case LVAL_ERR: free(v->err); break;
   case LVAL_SYM: free(v->sym); break;
