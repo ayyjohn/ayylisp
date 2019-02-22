@@ -434,6 +434,40 @@ lval* builtin_div(lenv* e, lval* a) {
   return builtin_op(e, a, "/");
 }
 
+/* method to add a new function to the environment */
+lval* builtin_def(lenv* e, lval* a) {
+  /* if input isn't a q-expression the compiler will attempt
+     to evaluate it immediately, so confirm input is q-expression */
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+          "function 'def' passed incorrect type");
+
+  /* after definition, must be followed by a symbol list */
+  lval* syms = a->cell[0];
+
+  /* ensure all elements in first symbol list are symbols */
+  for (int i = 0; i < syms->count; i++) {
+    LASSERT(a, syms->cell[i]->type == LVAL_SYM,
+            "function 'def' cannot define non-symbol");
+  }
+
+  /* ensure that the method receives count-1
+     inputs, where the -1 comes from removing the
+     method name */
+  LASSERT(a, syms->count == a->count-1,
+         "function 'def' cannot define incorrect "
+          "number of values to symbols");
+
+  /* assign variable names to each value in a */
+  for (int i = 0; i < syms->count; i++) {
+    lenv_put(e, syms->cell[i], a->cell[i+1]);
+  }
+
+  /* clean up */
+  lval_del(a);
+  /* return an empty s-expression on success */
+  return lval_sexpr();
+}
+
 /* method to add builtin method to the environment */
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func) {
   lval* k = lval_sym(name);
@@ -455,6 +489,9 @@ void lenv_add_builtins(lenv* e) {
   lenv_add_builtin(e, "-", builtin_sub);
   lenv_add_builtin(e, "*", builtin_mul);
   lenv_add_builtin(e, "/", builtin_div);
+
+  /* variable functions */
+  lenv_add_builtin(e, "def", builtin_def);
 }
 
 lval* builtin(lenv* e, lval* a, char* func) {
