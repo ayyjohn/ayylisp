@@ -1,7 +1,7 @@
-// using quotes means it searches the current directory first
+/* using quotes means it searches the current directory first */
 #include "mpc.h"
 
-// include methods for if we run this on windows
+/* include methods for if we run this on windows */
 #ifdef _WIN32
 #include <string.h>
 
@@ -18,28 +18,37 @@ char* readline(char* prompt) {
 
 void add_history(char* unused) {}
 
-// otherwise include editline headers
+/* otherwise include editline headers */
 #else
 #include<editline/readline.h>
 #endif
 
-/* create enum of possible lval types */
-enum { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
+/* forward declare lval and lenv structs to avoid cyclic dependency */
+struct lval;
+struct lenv;
+typedef struct lval lval;
+typedef struct lenv lenv;
 
-typedef lval*(*lbuiltin)(lenv*, lval*)
+/* create enum of possible lval types */
+enum { LVAL_ERR, LVAL_NUM,   LVAL_SYM,
+       LVAL_FUN, LVAL_SEXPR, LVAL_QEXPR };
+
+typedef lval*(*lbuiltin)(lenv*, lval*);
 
 /* declare lval (list value) structure */
-typedef struct lval {
-  // stores the type of lval, one of the above enum types
+struct lval {
+  /* stores the type of lval, one of the above enum types */
   int type;
-  // stores the number of the lval (if it has one)
+  /* stores the number of the lval (if it has one) */
   long num;
-  // stores the error of the lval (if it has one)
+  /* stores the error of the lval (if it has one) */
   char* err;
-  // stores the symbol of the lval (if it has one)
+  /* stores the symbol of the lval (if it has one) */
   char* sym;
-  // stores how many lvals are nested in cell
+  /* stores how many lvals are nested in cell */
   int count;
+  /* stores  */
+  lbuiltin fun;
   /* stores a recursive list of lvals */
   struct lval** cell;
 } lval;
@@ -373,7 +382,7 @@ lval* lval_read(mpc_ast_t* t) {
 }
 
 int main(int argc, char** argv) {
-  // create parsers
+  /* create parsers */
   mpc_parser_t* Number = mpc_new("number");
   mpc_parser_t* Symbol = mpc_new("symbol");
   mpc_parser_t* Sexpr  = mpc_new("sexpr");
@@ -381,7 +390,7 @@ int main(int argc, char** argv) {
   mpc_parser_t* Expr   = mpc_new("expr");
   mpc_parser_t* aLisp  = mpc_new("aLisp");
 
-  // define the parsers with the following language
+  /* define the parsers with the following language */
   mpca_lang(MPCA_LANG_DEFAULT,
   "                                                        \
     number : /-?[0-9]+/ ;                                  \
@@ -392,39 +401,39 @@ int main(int argc, char** argv) {
     aLisp  : /^/ <expr>* /$/ ;                             \
   ",
   Number, Symbol, Sexpr, Qexpr, Expr, aLisp);
-  // print version and instructions
+  /* print version and instructions */
   puts("lisp: by ayyjohn");
   puts("aLisp Version 0.0.0.0.5");
   puts("Press Ctrl+c to Exit\n");
 
-  // infinite repl loop
+  /* infinite repl loop */
   while (1) {
 
-    // prompt user
+    /* prompt user */
     char* input = readline("aLisp> ");
 
-    // add input to history
+    /* add input to history */
     add_history(input);
 
-    // add parsing for user input
+    /* add parsing for user input */
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, aLisp, &r)) {
-      // on success print the abstract syntax tree
+      /* on success print the abstract syntax tree */
       lval* x = lval_eval(lval_read(r.output));
       lval_println(x);
       lval_del(x);
       mpc_ast_delete(r.output);
     } else {
-      // otherwise print the error
+      /* otherwise print the error */
       mpc_err_print(r.error);
       mpc_err_delete(r.error);
     }
 
-    // free retrieved input
+    /* free retrieved input */
     free(input);
   }
 
-  // clean up parsers
+  /* clean up parsers */
   mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, aLisp);
   return 0;
 }
