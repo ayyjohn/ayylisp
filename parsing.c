@@ -26,6 +26,8 @@ void add_history(char* unused) {}
 /* create enum of possible lval types */
 enum { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
 
+typedef lval*(*lbuiltin)(lenv*, lval*)
+
 /* declare lval (list value) structure */
 typedef struct lval {
   // stores the type of lval, one of the above enum types
