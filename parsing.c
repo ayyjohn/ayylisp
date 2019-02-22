@@ -333,6 +333,13 @@ lval* lval_eval_sexpr(lval* v) {
   return result;
 }
 
+lval* lval_eval(lval* v) {
+  /* evaluates Sexpressions */
+  if (v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
+  /* all other lval types remain the same */
+  return v;
+}
+
 lval* lval_read_num(mpc_ast_t* t) {
   errno = 0;
   long x = strtol(t->contents, NULL, 10);
@@ -361,13 +368,6 @@ lval* lval_read(mpc_ast_t* t) {
   }
 
   return x;
-}
-
-lval* lval_eval(lval* v) {
-  /* evaluates Sexpressions */
-  if (v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
-  /* all other lval types remain the same */
-  return v;
 }
 
 int main(int argc, char** argv) {
