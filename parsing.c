@@ -255,6 +255,17 @@ lenv* lenv_new(void) {
   return e;
 }
 
+/* method to delete an environment */
+void lenv_del(lenv* e) {
+  for (int i = 0; i < e->count; i++) {
+    free(e->syms[i]);
+    lval_del(e->vals[i]);
+  }
+  free(e->syms);
+  free(e->vals);
+  free(e);
+}
+
 /* macro to verify basic repetitive conditions */
 #define LASSERT(args, cond, err)                          \
   if (!(cond)) { lval_del(args); return lval_err(err); }
