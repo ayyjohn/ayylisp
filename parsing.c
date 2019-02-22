@@ -267,7 +267,7 @@ void lenv_del(lenv* e) {
 }
 
 /* method to get values from the environment */
-lval* lval_get(lenv* e, lval* k) {
+lval* lenv_get(lenv* e, lval* k) {
   /* iterate over all existing symbols,
      see if any of the strings match the current symbol
      if so, return a copy of that lval, otherwise
@@ -308,7 +308,7 @@ void lenv_put(lenv* e, lval* k, lval* v) {
 #define LASSERT(args, cond, err)                          \
   if (!(cond)) { lval_del(args); return lval_err(err); }
 
-lval* lval_eval(lval* v);
+lval* lval_eval(lenv* e, lval* v);
 
 lval* builtin_list(lval* a) {
   a->type = LVAL_QEXPR;
@@ -428,10 +428,10 @@ lval* builtin(lval* a, char* func) {
   return lval_err("unrecognized function");
 }
 
-lval* lval_eval_sexpr(lval* v) {
+lval* lval_eval_sexpr(lenv* e, lval* v) {
   /* evaluate children */
   for (int i = 0; i < v->count; i++) {
-    v->cell[i] = lval_eval(v->cell[i]);
+    v->cell[i] = lval_eval(e, v->cell[i]);
   }
 
   /* check for errors */
@@ -445,23 +445,28 @@ lval* lval_eval_sexpr(lval* v) {
   /* single expressions */
   if (v->count == 1) { return lval_take(v, 0); }
 
-  /* ensure the first element is a symbol */
+  /* ensure the first element is a function after evaluation */
   lval* f = lval_pop(v, 0);
-  if (f->type != LVAL_SYM) {
+  if (f->type != LVAL_FUN) {
     lval_del(f);
     lval_del(v);
-    return lval_err("S-expression does not start with a symbol");
+    return lval_err("first element is not a function");
   }
 
-  /* call builtin with operator */
-  lval* result = builtin(v, f->sym);
+  lval* result = f->fun(e, v);
   lval_del(f);
   return result;
 }
 
-lval* lval_eval(lval* v) {
+lval* lval_eval(lenv* e, lval* v) {
+  /* check to see if symbol is defined, if not, return an error */
+  if (v->type == LVAL_SYM) {
+    lval* x = lenv_get(e, v);
+    lval_del(v);
+    return x;
+  }
   /* evaluates Sexpressions */
-  if (v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
+  if (v->type == LVAL_SEXPR) { return lval_eval_sexpr(e, v); }
   /* all other lval types remain the same */
   return v;
 }
