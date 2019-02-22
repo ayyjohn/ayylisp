@@ -245,6 +245,7 @@ struct lenv {
 
 lenv* lenv_new(void) {
   lenv* e = malloc(sizeof(lenv));
+  /* environment starts with no entries */
   e->count = 0;
   e->syms = NULL;
   e->vals = NULL;
