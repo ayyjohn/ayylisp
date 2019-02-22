@@ -310,12 +310,12 @@ void lenv_put(lenv* e, lval* k, lval* v) {
 
 lval* lval_eval(lenv* e, lval* v);
 
-lval* builtin_list(lval* a) {
+lval* builtin_list(lenv* e, lval* a) {
   a->type = LVAL_QEXPR;
   return a;
 }
 
-lval* builtin_head(lval* a) {
+lval* builtin_head(lenv* e, lval* a) {
   /*
     takes in an lval, verifies that it only has one cell, that the cell is
     a q-expression, and that that q-expression is not empty.
@@ -334,7 +334,7 @@ lval* builtin_head(lval* a) {
   return v;
 }
 
-lval* builtin_tail(lval* a) {
+lval* builtin_tail(lenv* e, lval* a) {
   /*
      takes in an lval, verifies that it only has one cell, that the cell is
      a q-expression, and that that q-expression is not empty.
@@ -352,7 +352,7 @@ lval* builtin_tail(lval* a) {
   return v;
 }
 
-lval* builtin_eval(lval* a) {
+lval* builtin_eval(lenv* e, lval* a) {
   LASSERT(a, a->count == 1,
           "function 'eval' passed too many arguments");
   LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
@@ -360,10 +360,10 @@ lval* builtin_eval(lval* a) {
 
   lval* x = lval_take(a, 0);
   x->type = LVAL_SEXPR;
-  return lval_eval(x);
+  return lval_eval(e, x);
 }
 
-lval* builtin_join(lval* a) {
+lval* builtin_join(lenv* e, lval* a) {
   for (int i = 0; i < a-> count; i++) {
     LASSERT(a, a->cell[i]->type == LVAL_QEXPR,
             "function 'join' passed incorrect type");
@@ -379,7 +379,7 @@ lval* builtin_join(lval* a) {
   return x;
 }
 
-lval* builtin_op(lval* a, char* op) {
+lval* builtin_op(lenv* e, lval* a, char* op) {
 
   /* ensure arguments are numbers */
   for (int i = 0; i < a->count; i++) {
@@ -417,13 +417,53 @@ lval* builtin_op(lval* a, char* op) {
   return x;
 }
 
-lval* builtin(lval* a, char* func) {
-  if (strcmp("list", func) == 0) { return builtin_list(a); }
-  if (strcmp("head", func) == 0) { return builtin_head(a); }
-  if (strcmp("tail", func) == 0) { return builtin_tail(a); }
-  if (strcmp("join", func) == 0) { return builtin_join(a); }
-  if (strcmp("eval", func) == 0) { return builtin_eval(a); }
-  if (strcmp("+-/*", func)) { return builtin_op(a, func); }
+/* all builtin basic math operations */
+lval* builtin_add(lenv* e, lval* a) {
+  return builtin_op(e, a, "+");
+}
+
+lval* builtin_sub(lenv* e, lval* a) {
+  return builtin_op(e, a, "-");
+}
+
+lval* builtin_mul(lenv* e, lval* a) {
+  return builtin_op(e, a, "*");
+}
+
+lval* builtin_div(lenv* e, lval* a) {
+  return builtin_op(e, a, "/");
+}
+
+/* method to add builtin method to the environment */
+void lenv_add_builtin(lenv* e, char* name, lbuiltin func) {
+  lval* k = lval_sym(name);
+  lval* v = lval_fun(func);
+  lenv_put(e, k, v);
+  lval_del(k); lval_del(v);
+}
+
+void lenv_add_builtins(lenv* e) {
+  /* list functions */
+  lenv_add_builtin(e, "list", builtin_list);
+  lenv_add_builtin(e, "head", builtin_head);
+  lenv_add_builtin(e, "tail", builtin_tail);
+  lenv_add_builtin(e, "eval", builtin_eval);
+  lenv_add_builtin(e, "join", builtin_join);
+
+  /* mathematical functions */
+  lenv_add_builtin(e, "+", builtin_add);
+  lenv_add_builtin(e, "-", builtin_sub);
+  lenv_add_builtin(e, "*", builtin_mul);
+  lenv_add_builtin(e, "/", builtin_div);
+}
+
+lval* builtin(lenv* e, lval* a, char* func) {
+  if (strcmp("list", func) == 0) { return builtin_list(e, a); }
+  if (strcmp("head", func) == 0) { return builtin_head(e, a); }
+  if (strcmp("tail", func) == 0) { return builtin_tail(e, a); }
+  if (strcmp("join", func) == 0) { return builtin_join(e, a); }
+  if (strcmp("eval", func) == 0) { return builtin_eval(e, a); }
+  if (strcmp("+-/*", func)) { return builtin_op(e, a, func); }
   lval_del(a);
   return lval_err("unrecognized function");
 }
@@ -526,6 +566,11 @@ int main(int argc, char** argv) {
   puts("aLisp Version 0.0.0.0.5");
   puts("Press Ctrl+c to Exit\n");
 
+  /* set up environment */
+  lenv* e = lenv_new();
+  /* add base methods */
+  lenv_add_builtins(e);
+
   /* infinite repl loop */
   while (1) {
 
@@ -539,7 +584,7 @@ int main(int argc, char** argv) {
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, aLisp, &r)) {
       /* on success print the abstract syntax tree */
-      lval* x = lval_eval(lval_read(r.output));
+      lval* x = lval_eval(e, lval_read(r.output));
       lval_println(x);
       lval_del(x);
       mpc_ast_delete(r.output);
