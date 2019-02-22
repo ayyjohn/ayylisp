@@ -389,7 +389,7 @@ int main(int argc, char** argv) {
     expr   : <number> | <symbol> | <sexpr> | <qexpr> ;     \
     aLisp  : /^/ <expr>* /$/ ;                             \
   ",
-  Number, Symbol, Sexpr, Qexpr, Expr, aLisp); 
+  Number, Symbol, Sexpr, Qexpr, Expr, aLisp);
   // print version and instructions
   puts("lisp: by ayyjohn");
   puts("aLisp Version 0.0.0.0.5");
