@@ -188,11 +188,12 @@ void lval_expr_print(lval* v, char open, char close) {
 /* how to print an lval */
 void lval_print(lval* v) {
   switch (v->type) {
-  case LVAL_NUM:   printf("%li", v->num); break;
-  case LVAL_ERR:   printf("Error: %s", v->err); break;
-  case LVAL_SYM:   printf("%s", v->sym); break;
-  case LVAL_SEXPR: lval_expr_print(v, '(', ')'); break;
-  case LVAL_QEXPR: lval_expr_print(v, '{', '}'); break;
+    case LVAL_FUN:   printf("<function>"); break;
+    case LVAL_NUM:   printf("%li", v->num); break;
+    case LVAL_ERR:   printf("Error: %s", v->err); break;
+    case LVAL_SYM:   printf("%s", v->sym); break;
+    case LVAL_SEXPR: lval_expr_print(v, '(', ')'); break;
+    case LVAL_QEXPR: lval_expr_print(v, '{', '}'); break;
   }
 }
 
