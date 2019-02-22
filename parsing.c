@@ -113,7 +113,7 @@ void lval_del(lval* v) {
   /* free string data for errors and symbols */
   case LVAL_ERR: free(v->err); break;
   case LVAL_SYM: free(v->sym); break;
-    /* delete all lval elements recursively for s-expressions */
+  /* delete all lval elements recursively for s-expressions */
   case LVAL_QEXPR:
   case LVAL_SEXPR:
     for (int i = 0; i < v->count; i++) {
