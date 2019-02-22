@@ -79,6 +79,14 @@ lval* lval_sym(char* s) {
   return v;
 }
 
+/* constructor for a pointer to a new function type lval */
+lval* lval_fun(lbuiltin func) {
+  lval* v = malloc(sizeof(lval));
+  v->type = LVAL_FUN;
+  v->fun = func;
+  return v;
+}
+
 /* constructor for a new, empty S-expression lval */
 lval* lval_sexpr(void) {
   lval* v = malloc(sizeof(lval));
