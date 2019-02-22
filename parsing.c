@@ -266,6 +266,44 @@ void lenv_del(lenv* e) {
   free(e);
 }
 
+/* method to get values from the environment */
+lval* lval_get(lenv* e, lval* k) {
+  /* iterate over all existing symbols,
+     see if any of the strings match the current symbol
+     if so, return a copy of that lval, otherwise
+     return an error because that variable was not defined */
+  for (int i = 0; i < e->count; i++) {
+    if (strcmp(e->syms[i], k->sym) == 0) {
+      return lval_copy(e->vals[i]);
+    }
+  }
+  return lval_err("unbound symbol");
+}
+
+/* method to put a new variable definition into the environment */
+void lenv_put(lenv* e, lval* k, lval* v) {
+  /* if the current variable name is already defined, overwrite
+     the lval. otherwise, allocate space for a new entry, and
+     copy the new variable into the environment */
+  for (int i = 0; i < e->count; i++) {
+    if (strcmp(e->syms[i], k->sym) == 0) {
+      lval_del(e->vals[i]);
+      e->vals[i] = lval_copy(v);
+      return;
+    }
+  }
+
+  e->count++;
+  /* add space for the new entry */
+  e->vals = realloc(e->vals, sizeof(lval*) * e->count);
+  e->syms = realloc(e->syms, sizeof(char*) * e->count);
+
+  /* perform copy over into new location */
+  e->vals[e->count-1] = lval_copy(v);
+  e->syms[e->count-1] = malloc(strlen(k->sym)+1);
+  strcpy(e->syms[e->count-1], k->sym);
+}
+
 /* macro to verify basic repetitive conditions */
 #define LASSERT(args, cond, err)                          \
   if (!(cond)) { lval_del(args); return lval_err(err); }
