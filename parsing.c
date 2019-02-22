@@ -232,6 +232,8 @@ void lval_print(lval* v) {
 /* println for lvals */
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
+/* represents the environment, stores twin lists of
+ variable names and their associated values */
 struct lenv {
   /* track number of entries */
   /* there should be exactly 1 variable name for each value */
@@ -243,6 +245,7 @@ struct lenv {
   lval** vals;
 };
 
+/* constructor for empty environment */
 lenv* lenv_new(void) {
   lenv* e = malloc(sizeof(lenv));
   /* environment starts with no entries */
