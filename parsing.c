@@ -62,11 +62,26 @@ lval* lval_num(long x) {
 }
 
 /* constructor for a pointer to an error type lval */
-lval* lval_err(char* m) {
+lval* lval_err(char* fmt, ...) {
   lval* v =  malloc(sizeof(lval));
   v->type = LVAL_ERR;
-  v->err = malloc(strlen(m) + 1);
-  strcpy(v->err, m);
+  /* create varargs list and initialize it */
+  va_list va;
+  va_start(va, fmt);
+
+  /* allocate default 512 bytes for error message */
+  /* will reallocate to smaller later */
+  v->err = malloc(512);
+
+  /* printf the error string with a maximum of 511 chars */
+  vsnprintf(v->err, 511, fmt, va);
+
+  /* reallocate error string to actual size */
+  v->err = realloc(v->err, strlen(v->err)+1);
+
+  /* cleanup */
+  va_end(va);
+
   return v;
 }
 
@@ -232,6 +247,19 @@ void lval_print(lval* v) {
 /* println for lvals */
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
+/* method to translate lval enum into human-readable names */
+char* ltype_name(int t) {
+  switch (t) {
+  case LVAL_FUN: return "Function";
+  case LVAL_NUM: return "Number";
+  case LVAL_ERR: return "Error";
+  case LVAL_SYM: return "Symbol";
+  case LVAL_SEXPR: return "S-Expression";
+  case LVAL_QEXPR: return "Q-Expression";
+  default: return "Unknown";
+  }
+}
+
 /* represents the environment, stores twin lists of
  variable names and their associated values */
 struct lenv {
@@ -305,8 +333,12 @@ void lenv_put(lenv* e, lval* k, lval* v) {
 }
 
 /* macro to verify basic repetitive conditions */
-#define LASSERT(args, cond, err)                          \
-  if (!(cond)) { lval_del(args); return lval_err(err); }
+#define LASSERT(args, cond, fmt, ...) \
+  if (!(cond)) { \
+    lval* err = lval_err(fmt, ##__VA_ARGS__); \
+    lval_del(args); \
+    return lval_err(err); \
+}
 
 lval* lval_eval(lenv* e, lval* v);
 
