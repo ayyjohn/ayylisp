@@ -145,6 +145,8 @@ void lval_del(lval* v) {
   free(v);
 }
 
+/* method for copying an lval, necessary for getting and putting
+   lvals to the environment as variables */
 lval* lval_copy(lval* v) {
 
   lval* x = malloc(sizeof(lval));
@@ -177,6 +179,7 @@ lval* lval_copy(lval* v) {
   return x;
 }
 
+/* method to add one lval to the lvals of another lval */
 lval* lval_add(lval* v, lval* x) {
   v->count++;
   v->cell = realloc(v->cell, sizeof(lval*) * v->count);
@@ -184,6 +187,7 @@ lval* lval_add(lval* v, lval* x) {
   return v;
 }
 
+/* method to return the lval at index i of a given lval */
 lval* lval_pop(lval* v, int i) {
   /* get the item at index i */
   lval* x = v->cell[i];
@@ -199,6 +203,7 @@ lval* lval_pop(lval* v, int i) {
   return x;
 }
 
+/* takes two lvals and adds all lvals from one to the other */
 lval* lval_join(lval* x, lval* y) {
   /* add all cells in y to x */
   while (y->count) {
@@ -209,6 +214,7 @@ lval* lval_join(lval* x, lval* y) {
   return x;
 }
 
+/* takes an lval, gets and returns the lval at index i from it */
 lval* lval_take(lval* v, int i) {
   lval* x = lval_pop(v, i);
   lval_del(v);
@@ -219,6 +225,7 @@ lval* lval_take(lval* v, int i) {
 /* resolves circular dependency */
 void lval_print(lval* v);
 
+/* recursively prints out a string representation of a nested lval */
 void lval_expr_print(lval* v, char open, char close) {
   putchar(open);
   for (int i = 0; i < v->count; i++) {
@@ -233,7 +240,8 @@ void lval_expr_print(lval* v, char open, char close) {
   putchar(close);
 }
 
-/* how to print an lval */
+/* how to print an lval. for s-expr and q-expr recursively call
+   to print out all lvals nested in the cell */
 void lval_print(lval* v) {
   switch (v->type) {
     case LVAL_FUN:   printf("<function>"); break;
@@ -270,14 +278,14 @@ struct lenv {
   int count;
   /* list of variable names */
   char** syms;
-  /* list of values for variable names */
+  /* list of values for the above variable names */
   lval** vals;
 };
 
 /* constructor for empty environment */
 lenv* lenv_new(void) {
   lenv* e = malloc(sizeof(lenv));
-  /* environment starts with no entries */
+  /* environment starts with no variables defined */ 
   e->count = 0;
   e->syms = NULL;
   e->vals = NULL;
@@ -286,6 +294,8 @@ lenv* lenv_new(void) {
 
 /* method to delete an environment */
 void lenv_del(lenv* e) {
+  /* delete each variable defined and free the memory
+     of the strings used to name the variables */
   for (int i = 0; i < e->count; i++) {
     free(e->syms[i]);
     lval_del(e->vals[i]);
@@ -341,27 +351,33 @@ void lenv_put(lenv* e, lval* k, lval* v) {
     return err; \
   }
 
+/* macro to confirm that a function is passed the correct type */
 #define LASSERT_TYPE(func, args, index, expect) \
   LASSERT(args, args->cell[index]->type == expect, \
     "function '%s' passed incorrect type for argument %i. got %s, expected %s.", \
           func, index, ltype_name(args->cell[index]->type), ltype_name(expect))
 
+/* macro to confirm that a function is passed the correct number of arguments */
 #define LASSERT_NUM(func, args, num) \
   LASSERT(args, args->count == num, \
     "function %s passed incorrect number of arguments. got %i, expected %i", \
     func, args->count, num)
 
+/* method to confirm that a function is passed in an expression at all */
 #define LASSERT_NOT_EMPTY(func, args, index) \
   LASSERT(args, args->cell[index]->count != 0, \
           "function %s passed empty expression for argument %i.", func, index)
 
+/* forward declare to avoid cyclic dependency */
 lval* lval_eval(lenv* e, lval* v);
 
+/* method to convert an lval into a q-expression */
 lval* builtin_list(lenv* e, lval* a) {
   a->type = LVAL_QEXPR;
   return a;
 }
 
+/* method to retrieve the first element of an lval */
 lval* builtin_head(lenv* e, lval* a) {
   /*
     takes in an lval, verifies that it only has one cell, that the cell is
@@ -378,6 +394,7 @@ lval* builtin_head(lenv* e, lval* a) {
   return v;
 }
 
+/* method te retrieve the last element of an lval */
 lval* builtin_tail(lenv* e, lval* a) {
   /*
      takes in an lval, verifies that it only has one cell, that the cell is
@@ -394,6 +411,7 @@ lval* builtin_tail(lenv* e, lval* a) {
   return v;
 }
 
+/* method to evaluate an s-expression written as a q-expression */
 lval* builtin_eval(lenv* e, lval* a) {
   LASSERT_NUM("eval", a, 1);
   LASSERT_TYPE("eval", a, 0, LVAL_QEXPR);
@@ -403,6 +421,7 @@ lval* builtin_eval(lenv* e, lval* a) {
   return lval_eval(e, x);
 }
 
+/* method to concatenate q-expressions */
 lval* builtin_join(lenv* e, lval* a) {
   for (int i = 0; i < a-> count; i++) {
     LASSERT_TYPE("join", a, i, LVAL_QEXPR);
@@ -418,6 +437,7 @@ lval* builtin_join(lenv* e, lval* a) {
   return x;
 }
 
+/* method to perform basic mathematical operators */
 lval* builtin_op(lenv* e, lval* a, char* op) {
 
   /* ensure arguments are numbers */
@@ -514,6 +534,7 @@ void lenv_add_builtin(lenv* e, char* name, lbuiltin func) {
   lval_del(k); lval_del(v);
 }
 
+/* method to add the basic functions to a newly initialized environment */
 void lenv_add_builtins(lenv* e) {
   /* list functions */
   lenv_add_builtin(e, "list", builtin_list);
@@ -532,17 +553,7 @@ void lenv_add_builtins(lenv* e) {
   lenv_add_builtin(e, "def", builtin_def);
 }
 
-lval* builtin(lenv* e, lval* a, char* func) {
-  if (strcmp("list", func) == 0) { return builtin_list(e, a); }
-  if (strcmp("head", func) == 0) { return builtin_head(e, a); }
-  if (strcmp("tail", func) == 0) { return builtin_tail(e, a); }
-  if (strcmp("join", func) == 0) { return builtin_join(e, a); }
-  if (strcmp("eval", func) == 0) { return builtin_eval(e, a); }
-  if (strcmp("+-/*", func)) { return builtin_op(e, a, func); }
-  lval_del(a);
-  return lval_err("unrecognized function");
-}
-
+/* method to evaluate an s-expression */
 lval* lval_eval_sexpr(lenv* e, lval* v) {
   /* evaluate children */
   for (int i = 0; i < v->count; i++) {
@@ -573,6 +584,7 @@ lval* lval_eval_sexpr(lenv* e, lval* v) {
   return result;
 }
 
+/* method to evaluate an lval */
 lval* lval_eval(lenv* e, lval* v) {
   /* check to see if symbol is defined, if not, return an error */
   if (v->type == LVAL_SYM) {
@@ -592,6 +604,8 @@ lval* lval_read_num(mpc_ast_t* t) {
   return errno != ERANGE ? lval_num(x) : lval_err("invalid number");
 }
 
+/* method to define how to read different inputs as
+   determined by the grammar parsing */
 lval* lval_read(mpc_ast_t* t) {
   /* if symbol or number return lval of that type */
   if (strstr(t->tag, "number")) { return lval_read_num(t); }
@@ -658,7 +672,7 @@ int main(int argc, char** argv) {
     /* add parsing for user input */
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, aLisp, &r)) {
-      /* on success print the abstract syntax tree */
+      /* on success evaluate the AST */
       lval* x = lval_eval(e, lval_read(r.output));
       lval_println(x);
       lval_del(x);
