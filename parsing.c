@@ -1,7 +1,7 @@
 /* using quotes means it searches the current directory first */
 #include "mpc.h"
 
-/* include methods for if we run this on windows */
+/* include methods for if we compile this on windows */
 #ifdef _WIN32
 #include <string.h>
 
@@ -18,7 +18,7 @@ char* readline(char* prompt) {
 
 void add_history(char* unused) {}
 
-/* otherwise include editline headers */
+/* otherwise include editline headers for if running on MacOS*/
 #else
 #include<editline/readline.h>
 #endif
@@ -33,6 +33,7 @@ typedef struct lenv lenv;
 enum { LVAL_ERR, LVAL_NUM,   LVAL_SYM,
        LVAL_FUN, LVAL_SEXPR, LVAL_QEXPR };
 
+/* define pointer-to-function lbuiltin */
 typedef lval*(*lbuiltin)(lenv*, lval*);
 
 /* declare lval (list value) structure */
