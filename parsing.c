@@ -106,6 +106,23 @@ lval* lval_fun(lbuiltin func) {
   return v;
 }
 
+/* constructor for user defined functions */
+/* formals represent the arguments in the function definition */
+/* body is a q-expression containing the function body */
+lval* lval_lambda(lval* formals, lval* body) {
+  /* set aside memory and set type */
+  lval* v = malloc(sizeof(lval));
+  v->type = LVAL_FUN;
+  /* differentiates between user defined and builtin functions */
+  v->builtin = NULL;
+  /* initialize new environment for variables to be set */
+  v->env = lenv_new();
+
+  v->formals = formals;
+  v->body = body;
+  return v;
+}
+
 /* constructor for a new, empty S-expression lval */
 lval* lval_sexpr(void) {
   lval* v = malloc(sizeof(lval));
