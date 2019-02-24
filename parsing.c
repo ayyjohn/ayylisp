@@ -144,13 +144,23 @@ lval* lval_qexpr(void) {
   return v;
 }
 
+/* forward declare lenv_del method so it can be
+   used to clean up user defined functions */
+void lenv_del(lenv* e);
+
 /* method to delete an lval, depending on type */
 void lval_del(lval* v) {
   switch(v->type) {
   /* do nothing for number type, no nested malloc calls */
   case LVAL_NUM: break;
-  /* do nothing for function type, no nested malloc calls */
-  case LVAL_FUN: break;
+  /* only nested malloc calls for user defined functions, not builtins */
+  case LVAL_FUN:
+    if (!v->builtin) {
+      lenv_del(v->env);
+      lval_del(v->formals);
+      lval_del(v->body);
+    }
+    break;
   /* free string data for errors and symbols */
   case LVAL_ERR: free(v->err); break;
   case LVAL_SYM: free(v->sym); break;
