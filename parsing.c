@@ -675,6 +675,47 @@ void lenv_add_builtins(lenv* e) {
   lenv_add_builtin(e, "\\", builtin_lambda);
 }
 
+/* method to call functions */
+lval* lval_call(lenv* e, lval* f, lval* a) {
+  /* if builtin, just call */
+  if (f->builtin) { return f->builtin(e, a); }
+
+  /* record argument counts */
+  int given = a->count;
+  int total = f->formals->count;
+
+  /* while there are still arguments to be processed */
+  while (a->count) {
+    /* if we've been given too many arguments */
+    if (f->formals->count == 0) {
+      lval_del(a); return lval_err(
+         "function passed too many arguments. "
+         "got %i, expected %i", given, total);
+    }
+
+    /* fetch the first symbol from the formals */
+    /* and arguments and bind it to the environment */
+    lval* sym = lval_pop(f->formals, 0);
+    lval* val = lval_pop(a, 0);
+    lenv_put(f->env, sym, val);
+
+    /* clean up */
+    lval_del(sym); lval_del(val);
+  }
+  /* argument list is now bound, so can be cleaned up */
+  lval_del(a);
+
+  /* allow for partial evaluation; less than the desired number of */
+  /* arguments can be passed in and we will return a partially */
+  /* evaluated function, otherwise evaluate */
+  if (f->formals->count == 0) {
+    f->env->par = e;
+    return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->body)));
+  } else {
+    return lval_copy(f);
+  }
+}
+
 /* method to evaluate an s-expression */
 lval* lval_eval_sexpr(lenv* e, lval* v) {
   /* evaluate children */
@@ -696,12 +737,16 @@ lval* lval_eval_sexpr(lenv* e, lval* v) {
   /* ensure the first element is a function after evaluation */
   lval* f = lval_pop(v, 0);
   if (f->type != LVAL_FUN) {
+    lval* err = lval_err(
+      "s-expression starts with incorrect type. "
+      "got %s, expected %s",
+      ltype_name(f->type), ltype_name(LVAL_FUN));
     lval_del(f);
     lval_del(v);
-    return lval_err("first element is not a function");
+    return err;
   }
 
-  lval* result = f->builtin(e, v);
+  lval* result = lval_call(e, f, v);
   lval_del(f);
   return result;
 }
