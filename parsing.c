@@ -323,6 +323,8 @@ char* ltype_name(int t) {
 /* represents the environment, stores twin lists of
  variable names and their associated values */
 struct lenv {
+  /* parent environment, null for global environment */
+  lenv* par;
   /* track number of entries */
   /* there should be exactly 1 variable name for each value */
   /* at the same index */
@@ -336,7 +338,8 @@ struct lenv {
 /* constructor for empty environment */
 lenv* lenv_new(void) {
   lenv* e = malloc(sizeof(lenv));
-  /* environment starts with no variables defined */ 
+  /* environment starts with no variables defined and no parent */
+  e->par = NULL;
   e->count = 0;
   e->syms = NULL;
   e->vals = NULL;
@@ -367,7 +370,13 @@ lval* lenv_get(lenv* e, lval* k) {
       return lval_copy(e->vals[i]);
     }
   }
-  return lval_err("unbound symbol");
+  /* if the symbol is not found, check parent environments
+     to ensure that the symobl is not defined higher up */
+  if (e->par) {
+    return lenv_get(e->par, k);
+  } else {
+    return lval_err("unbound symbol '%s'", k->sym);
+  }
 }
 
 /* method to put a new variable definition into the environment */
