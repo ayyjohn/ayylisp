@@ -395,7 +395,7 @@ lval* lenv_get(lenv* e, lval* k) {
   }
 }
 
-/* method to put a new variable definition into the environment */
+/* method to put a new variable definition into the local environment */
 void lenv_put(lenv* e, lval* k, lval* v) {
   /* if the current variable name is already defined, overwrite
      the lval. otherwise, allocate space for a new entry, and
