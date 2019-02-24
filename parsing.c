@@ -106,6 +106,9 @@ lval* lval_fun(lbuiltin func) {
   return v;
 }
 
+/* forward declare constructor for new lenv for use in user defined methods */
+lenv* lenv_new(void);
+
 /* constructor for user defined functions */
 /* formals represent the arguments in the function definition */
 /* body is a q-expression containing the function body */
