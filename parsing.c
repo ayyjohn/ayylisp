@@ -38,19 +38,22 @@ typedef lval*(*lbuiltin)(lenv*, lval*);
 
 /* declare lval (list value) structure */
 struct lval {
-  /* stores the type of lval, one of the above enum types */
+  /* type of lval, one of the above enum values */
   int type;
-  /* stores the number of the lval (if it has one) */
+
+  /* for the basic type lvals (nums, errors, symbols) */
   long num;
-  /* stores the error of the lval (if it has one) */
   char* err;
-  /* stores the symbol of the lval (if it has one) */
   char* sym;
-  /* stores how many lvals are nested in cell */
+
+  /* for function type lvals */
+  lbuiltin builtin;
+  lenv* env;
+  lval* formals;
+  lval* body;
+
+  /* for expression type lvals (s and q expressions)*/
   int count;
-  /* stores  */
-  lbuiltin fun;
-  /* stores a recursive list of lvals */
   struct lval** cell;
 };
 
@@ -99,7 +102,7 @@ lval* lval_sym(char* s) {
 lval* lval_fun(lbuiltin func) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_FUN;
-  v->fun = func;
+  v->builtin = func;
   return v;
 }
 
@@ -154,7 +157,7 @@ lval* lval_copy(lval* v) {
 
   switch (v->type) {
     /* for non-nested lval, just copy contents directly */
-    case LVAL_FUN: x->fun = v->fun; break;
+    case LVAL_FUN: x->builtin = v->builtin; break;
     case LVAL_NUM: x->num = v->num; break;
 
     /* copy string lvals with strcpy */
@@ -579,7 +582,7 @@ lval* lval_eval_sexpr(lenv* e, lval* v) {
     return lval_err("first element is not a function");
   }
 
-  lval* result = f->fun(e, v);
+  lval* result = f->builtin(e, v);
   lval_del(f);
   return result;
 }
