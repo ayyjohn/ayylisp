@@ -595,7 +595,7 @@ lval* builtin_div(lenv* e, lval* a) {
 }
 
 /* method to add a new function to the environment */
-lval* builtin_def(lenv* e, lval* a) {
+lval* builtin_var(lenv* e, lval* a, char* func) {
   /* if input isn't a q-expression the compiler will attempt
      to evaluate it immediately, so confirm input is q-expression */
   LASSERT_TYPE("def", a, 0, LVAL_QEXPR);
@@ -619,15 +619,31 @@ lval* builtin_def(lenv* e, lval* a) {
           "got %i, expected %i",
           syms->count, a->count-1);
 
-  /* assign variable names to each value in a */
+  /* assign variable names for each value in a */
   for (int i = 0; i < syms->count; i++) {
-    lenv_put(e, syms->cell[i], a->cell[i+1]);
+    /* if 'def' define globally, if 'put' define locally */
+    if (strcmp(func, "def") == 0) {
+      lenv_def(e, syms->cell[i], a->cell[i+1]);
+    }
+    if (strcmp(func, "=") == 0) {
+      lenv_put(e, syms->cell[i], a->cell[i+1]);
+    }
   }
 
   /* clean up */
   lval_del(a);
   /* return an empty s-expression on success */
   return lval_sexpr();
+}
+
+/* builtin method to put a variable to the global scope */
+lval* builtin_def(lenv* e, lval* a) {
+  return builtin_var(e, a, "def");
+}
+
+/* builtin method to put a variable to the local scope */
+lval* builtin_put(lenv* e, lval* a) {
+  return builtin_var(e, a, "=");
 }
 
 /* method to add builtin method to the environment */
@@ -655,6 +671,7 @@ void lenv_add_builtins(lenv* e) {
 
   /* variable functions */
   lenv_add_builtin(e, "def", builtin_def);
+  lenv_add_builtin(e, "=", builtin_put);
   lenv_add_builtin(e, "\\", builtin_lambda);
 }
 
