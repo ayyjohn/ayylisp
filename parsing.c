@@ -178,16 +178,27 @@ void lval_del(lval* v) {
   free(v);
 }
 
+/* forward declare lenv copy method for use in lval copy */
+lenv* lenv_copy(lenv* e);
+
 /* method for copying an lval, necessary for getting and putting
    lvals to the environment as variables */
 lval* lval_copy(lval* v) {
-
   lval* x = malloc(sizeof(lval));
   x->type = v-> type;
 
   switch (v->type) {
+    case LVAL_FUN:
+      if (v->builtin) {
+        x->builtin = v->builtin;
+      } else {
+        x->builtin = NULL;
+        x->env = lenv_copy(v->env);
+        x->formals = lval_copy(v->formals);
+        x->body = lval_copy(v->body);
+      }
+    break;
     /* for non-nested lval, just copy contents directly */
-    case LVAL_FUN: x->builtin = v->builtin; break;
     case LVAL_NUM: x->num = v->num; break;
 
     /* copy string lvals with strcpy */
