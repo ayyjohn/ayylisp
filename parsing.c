@@ -422,6 +422,27 @@ void lenv_put(lenv* e, lval* k, lval* v) {
 /* forward declare to avoid cyclic dependency */
 lval* lval_eval(lenv* e, lval* v);
 
+/* builtin method to create a user defined function out of two q-expressions as input */
+lval* builtin_lambda(lenv* e, lval* a) {
+  /* assert that there are two arguments, both q-expressions */
+  LASSERT_NUM("\\", a, 2);
+  LASSERT_TYPE("\\", a, 0, LVAL_QEXPR);
+  LASSERT_TYPE("\\", A, 1, LVAL_QEXPR);
+
+  /* assert that the first q-expression contains only symbols */
+  for (int i = 0; i < a->cell[0]->count; i++) {
+    LASSERT(a, (a->cell[0]->cell[i]->type == LVAL_SYM),
+            "cannot define non-symbol. got %s, expected %s",
+            ltype_name(a->cell[0]->cell[i]->type), ltype_name(LVAL_SYM));
+  }
+
+  lval* formals = lval_pop(a, 0);
+  lval* body = lval_pop(a, 0);
+  lval_del(a);
+
+  return lval_lambda(formals, body);
+}
+
 /* method to convert an lval into a q-expression */
 lval* builtin_list(lenv* e, lval* a) {
   a->type = LVAL_QEXPR;
@@ -602,6 +623,7 @@ void lenv_add_builtins(lenv* e) {
 
   /* variable functions */
   lenv_add_builtin(e, "def", builtin_def);
+  lenv_add_builtin(e, "\\", builtin_lambda);
 }
 
 /* method to evaluate an s-expression */
