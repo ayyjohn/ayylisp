@@ -419,6 +419,13 @@ void lenv_put(lenv* e, lval* k, lval* v) {
   strcpy(e->syms[e->count-1], k->sym);
 }
 
+/* method to put a new variable definiton to the global environment */
+void lenv_def(lenv* e, lval* k, lval* v) {
+  /* iterate up to the global environment */
+  while (e->par) { e = e->par; }
+  /* place the variable name and contents into the global env */
+  lenv_put(e, k, v);
+}
 /* macro to verify basic repetitive conditions */
 #define LASSERT(args, cond, fmt, ...) \
   if (!(cond)) { \
