@@ -427,7 +427,7 @@ lval* builtin_lambda(lenv* e, lval* a) {
   /* assert that there are two arguments, both q-expressions */
   LASSERT_NUM("\\", a, 2);
   LASSERT_TYPE("\\", a, 0, LVAL_QEXPR);
-  LASSERT_TYPE("\\", A, 1, LVAL_QEXPR);
+  LASSERT_TYPE("\\", a, 1, LVAL_QEXPR);
 
   /* assert that the first q-expression contains only symbols */
   for (int i = 0; i < a->cell[0]->count; i++) {
