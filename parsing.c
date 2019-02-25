@@ -721,6 +721,30 @@ lval* builtin_le(lenv* e, lval* a) {
   return builtin_ord(e, a, "<=");
 }
 
+/* builtin method to compare equality between two lvals */
+lval* builin_cmp(lenv* e, lval* a, char* op) {
+  /* ensure two inputs to compare equality for */
+  LASSERT_NUM(op, a, 2);
+  int r;
+  if (strcmp(op, "==") == 0) {
+    r = lval_eq(a->cell[0], a->cell[1]);
+  }
+  if (strcmp(op, "!=") == 0) {
+    r = !lval_eq(a->cell[0], a->cell[1]);
+  }
+  lval_del(a);
+  return lval_num(r);
+}
+
+/* builtins for equals and not equals */
+lval* builtin_eq(lenv* e, lval* a) {
+  return builtin_cmp(e, a, "==");
+}
+
+lval* builtin_ne(lenv* e, lval* a) {
+  return builtin_cmp(e, a, "!=");
+}
+
 /* method to add builtin method to the environment */
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func) {
   lval* k = lval_sym(name);
