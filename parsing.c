@@ -639,18 +639,18 @@ lval* builtin_var(lenv* e, lval* a, char* func) {
   /* ensure all elements in first symbol list are symbols */
   for (int i = 0; i < syms->count; i++) {
     LASSERT(a, syms->cell[i]->type == LVAL_SYM,
-            "function 'def' cannot define non-symbol"
+            "function '%s' cannot define non-symbol"
             "got %s, expected %s",
-            ltype_name(syms->cell[i]->type), ltype_name(LVAL_SYM));
+            func, ltype_name(LVAL_SYM), ltype_name(syms->cell[i]->type));
   }
 
   /* ensure that the method receives count-1
      inputs, where the -1 comes from removing the
      method name */
   LASSERT(a, syms->count == a->count-1,
-          "function 'def' passed too many arguments for symbols. "
+          "function '%s' passed too many arguments for symbols. "
           "got %i, expected %i",
-          syms->count, a->count-1);
+          func, a->count-1, syms->count);
 
   /* assign variable names for each value in a */
   for (int i = 0; i < syms->count; i++) {
