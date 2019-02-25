@@ -307,6 +307,39 @@ void lval_print(lval* v) {
 /* println for lvals */
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
+/* comparison method for lvals. compare all relevant fields for each type */
+int lval_eq(lval* x, lval* y) {
+  /* different types are never equal, immediate short circuit */
+  if (x->type != y->type) { return 0; }
+
+  switch (x->type) {
+    /* numbers compare value */
+    case LVAL_NUM: return (x->num == y->num);
+
+    /* string lvals compare string values */
+    case LVAL_ERR: return (strcmp(x->err, y->err) == 0);
+    case LVAL_SYM: return (strcmp(x->sym, y->sym) == 0);
+
+    /* for functions, compare builtin if builtin, otherwise compare formals and args individually */
+    case LVAL_FUN:
+      if (x->builtin || y->builtin) {
+        return x->builtin == y->builtin;
+      } else {
+        return lval_eq(x->formals, y->formals) && lval_eq(x->body, y->body);
+      }
+      /* if list, compare each element */
+    case LVAL_QEXPR:
+    case LVAL_SEXPR:
+      if (x->count != y->count) { return 0; }
+      for (int i = 0; i < x->count; i++) {
+        /* return false as soon as any values don't equal each other */
+        if (!lval_eq(x->cell[i], y->cell[i])) { return 0; }
+      }
+      return 1;
+    break;
+  }
+  return 0;
+}
 /* method to translate lval enum into human-readable names */
 char* ltype_name(int t) {
   switch (t) {
