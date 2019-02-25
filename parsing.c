@@ -722,7 +722,7 @@ lval* builtin_le(lenv* e, lval* a) {
 }
 
 /* builtin method to compare equality between two lvals */
-lval* builin_cmp(lenv* e, lval* a, char* op) {
+lval* builtin_cmp(lenv* e, lval* a, char* op) {
   /* ensure two inputs to compare equality for */
   LASSERT_NUM(op, a, 2);
   int r;
