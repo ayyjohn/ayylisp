@@ -753,6 +753,29 @@ void lenv_add_builtin(lenv* e, char* name, lbuiltin func) {
   lval_del(k); lval_del(v);
 }
 
+lval* builtin_if(lenv* e, lval* a) {
+  /* verify that there are three inputs, a number 0 or 1 */
+  /* and two possible q-expressions to evaluat */
+  LASSERT_NUM("if", a, 3);
+  LASSERT_TYPE("if", a, 0, LVAL_NUM);
+  LASSERT_TYPE("if", a, 1, LVAL_QEXPR);
+  LASSERT_TYPE("if", a, 2, LVAL_QEXPR);
+  /* mark both expressions as s-expressions to make them evaluable */
+  lval* x;
+  a->cell[1]->type = LVAL_SEXPR;
+  a->cell[2]->type = LVAL_SEXPR;
+
+  /* if the boolean is true, evaluate the first expression,
+     otherwise evaluate the second */
+  if (a->cell[0]->num) {
+    x = lval_eval(e, lval_pop(a, 1));
+  } else {
+    x = lval_eval(e, lval_pop(a, 2));
+  }
+  lval_del(a);
+  return x;
+}
+
 /* method to add the basic functions to a newly initialized environment */
 void lenv_add_builtins(lenv* e) {
   /* list functions */
@@ -767,6 +790,15 @@ void lenv_add_builtins(lenv* e) {
   lenv_add_builtin(e, "-", builtin_sub);
   lenv_add_builtin(e, "*", builtin_mul);
   lenv_add_builtin(e, "/", builtin_div);
+
+  /* comparison functions */
+  lenv_add_builtin(e, "if", builtin_if);
+  lenv_add_builtin(e, "==", builtin_eq);
+  lenv_add_builtin(e, "!=", builtin_ne);
+  lenv_add_builtin(e, ">",  builtin_gt);
+  lenv_add_builtin(e, "<",  builtin_lt);
+  lenv_add_builtin(e, ">=", builtin_ge);
+  lenv_add_builtin(e, "<=", builtin_le);
 
   /* variable functions */
   lenv_add_builtin(e, "def", builtin_def);
