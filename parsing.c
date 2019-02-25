@@ -696,6 +696,21 @@ lval* lval_call(lenv* e, lval* f, lval* a) {
     /* fetch the first symbol from the formals */
     /* and arguments and bind it to the environment */
     lval* sym = lval_pop(f->formals, 0);
+    /* check for ampersand symbol to evaluate variable length arguments */
+    if (strcmp(sym->sym, "&") == 0) {
+      /* verify that & is followed by another symbol */
+      if (f->formals->count != 1) {
+        lval_del(a);
+        return lval_err("function format invalid. "
+                        "symbol '&' not followed by a single symbol.");
+      }
+
+      /* bind next formal to the remaining arguments */
+      lval* nsym = lval_pop(f->formals, 0);
+      lenv_put(f->env, nsym, builtin_list(e, a));
+      lval_del(sym); lval_del(nsym);
+      break;
+    }
     lval* val = lval_pop(a, 0);
     lenv_put(f->env, sym, val);
 
@@ -705,6 +720,22 @@ lval* lval_call(lenv* e, lval* f, lval* a) {
   /* argument list is now bound, so can be cleaned up */
   lval_del(a);
 
+  /* account for empty varargs list in evaluation */
+  if (f->formals->count > 0 && strcmp(f->formals->cell[0]->sym, "&") == 0) {
+    if (f->formals->count != 2) {
+      return lval_err("function format invalid. "
+                      "symbol '&' not followed by a single symbol");
+    }
+
+    /* pop and delete the '&' symbol */
+    lval_del(lval_pop(f->formals, 0));
+
+    /* create an empty list and bind the following symbol to it */
+    lval* sym = lval_pop(f->formals, 0);
+    lval* val = lval_qexpr();
+    lenv_put(f->env, sym, val);
+    lval_del(sym); lval_del(val);
+  }
   /* allow for partial evaluation; less than the desired number of */
   /* arguments can be passed in and we will return a partially */
   /* evaluated function, otherwise evaluate */
