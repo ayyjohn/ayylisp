@@ -6,3 +6,4 @@ includes
 * conditional logic
 * functional manipulation such as currying
 * string, list, and number builtin methods
+* lexical scoping for lambdas and user-defined functions
