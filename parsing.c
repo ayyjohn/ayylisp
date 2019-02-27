@@ -99,6 +99,7 @@ lval* lval_sym(char* s) {
   return v;
 }
 
+/* constructor for a pointer to a new string type lval */
 lval* lval_str(char* s) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_STR;
