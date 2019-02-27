@@ -99,6 +99,14 @@ lval* lval_sym(char* s) {
   return v;
 }
 
+lval* lval_str(char* s) {
+  lval* v = malloc(sizeof(lval));
+  v->type = LVAL_STR;
+  v->str = malloc(strlen(s) + 1);
+  strcpy(v->str, s);
+  return v;
+}
+
 /* constructor for a pointer to a new function type lval */
 lval* lval_builtin(lbuiltin func) {
   lval* v = malloc(sizeof(lval));
