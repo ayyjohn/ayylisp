@@ -100,7 +100,7 @@ lval* lval_sym(char* s) {
 }
 
 /* constructor for a pointer to a new function type lval */
-lval* lval_fun(lbuiltin func) {
+lval* lval_builtin(lbuiltin func) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_FUN;
   v->builtin = func;
@@ -749,7 +749,7 @@ lval* builtin_ne(lenv* e, lval* a) {
 /* method to add builtin method to the environment */
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func) {
   lval* k = lval_sym(name);
-  lval* v = lval_fun(func);
+  lval* v = lval_builtin(func);
   lenv_put(e, k, v);
   lval_del(k); lval_del(v);
 }
