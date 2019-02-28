@@ -1022,7 +1022,8 @@ int main(int argc, char** argv) {
     string : /\"(\\\\.|[^\"])*\"/ ;                        \
     sexpr  : '(' <expr>* ')' ;                             \
     qexpr  : '{' <expr>* '}' ;                             \
-    expr   : <number> | <symbol> | <sexpr> | <qexpr> ;     \
+    expr   : <number> | <symbol> | <string>                \
+                      | <sexpr>  | <qexpr> ;               \
     aLisp  : /^/ <expr>* /$/ ;                             \
   ",
   Number, Symbol, String, Sexpr, Qexpr, Expr, aLisp);
