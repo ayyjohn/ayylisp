@@ -1094,6 +1094,7 @@ int main(int argc, char** argv) {
   /* add base methods */
   lenv_add_builtins(e);
 
+  /* if just aLisp is invoked */
   if (argc == 1) {
     /* infinite repl loop */
     while (1) {
@@ -1123,6 +1124,23 @@ int main(int argc, char** argv) {
     }
   }
 
+  /* if filenames are supplied to aLisp */
+  if (argc >= 2) {
+
+    /* loop over each supplied filename (starting from 1) */
+    for (int i = 1; i < argc; i++) {
+
+      /* Argument list with a single argument, the filename */
+      lval* args = lval_add(lval_sexpr(), lval_str(argv[i]));
+
+      /* Pass to builtin load and get the result */
+      lval* x = builtin_load(e, args);
+
+      /* If the result is an error be sure to print it */
+      if (x->type == LVAL_ERR) { lval_println(x); }
+      lval_del(x);
+    }
+}
   /* clean up parsers */
   mpc_cleanup(8,
               Number, Symbol, String, Comment,
