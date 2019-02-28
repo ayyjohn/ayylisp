@@ -956,6 +956,7 @@ lval* lval_eval(lenv* e, lval* v) {
   return v;
 }
 
+/* defines how to read a number and convert to an lval */
 lval* lval_read_num(mpc_ast_t* t) {
   errno = 0;
   long x = strtol(t->contents, NULL, 10);
