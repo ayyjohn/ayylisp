@@ -219,6 +219,9 @@ lval* lval_copy(lval* v) {
     case LVAL_SYM:
       x->sym = malloc(strlen(v->sym) + 1);
       strcpy(x->sym, v->sym); break;
+    case LVAL_STR:
+      x->str = malloc(strlen(v->str) + 1);
+      strcpy(x->sym, v->sym); break;
 
     /* for nested lvals, copy sub expressions recursively */
     case LVAL_SEXPR:
