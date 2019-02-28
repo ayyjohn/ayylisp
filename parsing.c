@@ -1064,6 +1064,6 @@ int main(int argc, char** argv) {
   }
 
   /* clean up parsers */
-  mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, aLisp);
+  mpc_cleanup(7, Number, Symbol, String, Sexpr, Qexpr, Expr, aLisp);
   return 0;
 }
