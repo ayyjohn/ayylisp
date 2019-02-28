@@ -300,7 +300,7 @@ void lval_expr_print(lval* v, char open, char close) {
 
 /* how to print a string lval, ensures characters are escaped correctly */
 void lval_print_str(lval* v) {
-  char* escaped = malloc(strlen(v->str) + 1);
+  char* escaped = malloc(strlen(v->str)+1);
   strcpy(escaped, v->str);
   escaped = mpcf_escape(escaped);
   /* print the lval string field between quotes */
