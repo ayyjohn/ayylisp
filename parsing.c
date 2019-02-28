@@ -343,7 +343,7 @@ int lval_eq(lval* x, lval* y) {
     /* numbers compare value */
     case LVAL_NUM: return (x->num == y->num);
 
-    /* string lvals compare string values */
+    /* string-containing lvals compare string values */
     case LVAL_ERR: return (strcmp(x->err, y->err) == 0);
     case LVAL_SYM: return (strcmp(x->sym, y->sym) == 0);
     case LVAL_STR: return (strcmp(x->str, y->str) == 0);
