@@ -818,6 +818,7 @@ lval* builtin_if(lenv* e, lval* a) {
 
 lval* lval_read(mpc_ast_t* t);
 
+/* load and evaluate a file */
 lval* builtin_load(lenv* e, lval* a) {
   LASSERT_NUM("load", a, 1);
   LASSERT_TYPE("load", a, 0, LVAL_STR);
@@ -825,6 +826,7 @@ lval* builtin_load(lenv* e, lval* a) {
   /* parse file given by string name */
   mpc_result_t r;
   if (mpc_parse_contents(a->cell[0]->str, aLisp, &r)) {
+
     /* read file contents */
     lval* expr = lval_read(r.output);
     mpc_ast_delete(r.output);
@@ -836,11 +838,13 @@ lval* builtin_load(lenv* e, lval* a) {
       if (x->type == LVAL_ERR) { lval_println(x); }
       lval_del(x);
     }
+
     /* cleanup */
     lval_del(expr);
     lval_del(a);
 
     return lval_sexpr();
+
   } else {
     /* get parse error as a string */
     char* err_msg = mpc_err_string(r.error);
@@ -854,6 +858,7 @@ lval* builtin_load(lenv* e, lval* a) {
     return err;
   }
 }
+
 /* method to add the basic functions to a newly initialized environment */
 void lenv_add_builtins(lenv* e) {
   /* list functions */
