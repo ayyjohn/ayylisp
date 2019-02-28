@@ -23,6 +23,17 @@ void add_history(char* unused) {}
 #include<editline/readline.h>
 #endif
 
+/* forward declare parsers  */
+
+mpc_parser_t* Number;
+mpc_parser_t* Symbol;
+mpc_parser_t* String;
+mpc_parser_t* Comment;
+mpc_parser_t* Sexpr;
+mpc_parser_t* Qexpr;
+mpc_parser_t* Expr;
+mpc_parser_t* aLisp;
+
 /* forward declare lval and lenv structs to avoid cyclic dependency */
 struct lval;
 struct lenv;
