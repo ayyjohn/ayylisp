@@ -816,6 +816,8 @@ lval* builtin_if(lenv* e, lval* a) {
   return x;
 }
 
+lval* lval_read(mpc_ast_t* t);
+
 lval* builtin_load(lenv* e, lval* a) {
   LASSERT_NUM("load", a, 1);
   LASSERT_TYPE("load", a, 0, LVAL_STR);
@@ -831,7 +833,7 @@ lval* builtin_load(lenv* e, lval* a) {
     while (expr->count) {
       lval* x = lval_eval(e, lval_pop(expr, 0));
       /* print any errors encountered */
-      if (x->type = LVAL_ERR) { lval_println(x); }
+      if (x->type == LVAL_ERR) { lval_println(x); }
       lval_del(x);
     }
     /* cleanup */
@@ -1087,31 +1089,33 @@ int main(int argc, char** argv) {
   /* add base methods */
   lenv_add_builtins(e);
 
-  /* infinite repl loop */
-  while (1) {
+  if (argc == 1) {
+    /* infinite repl loop */
+    while (1) {
 
-    /* prompt user */
-    char* input = readline("aLisp> ");
+      /* prompt user */
+      char* input = readline("aLisp> ");
 
-    /* add input to history */
-    add_history(input);
+      /* add input to history */
+      add_history(input);
 
-    /* add parsing for user input */
-    mpc_result_t r;
-    if (mpc_parse("<stdin>", input, aLisp, &r)) {
-      /* on success evaluate the AST */
-      lval* x = lval_eval(e, lval_read(r.output));
-      lval_println(x);
-      lval_del(x);
-      mpc_ast_delete(r.output);
-    } else {
-      /* otherwise print the error */
-      mpc_err_print(r.error);
-      mpc_err_delete(r.error);
+      /* add parsing for user input */
+      mpc_result_t r;
+      if (mpc_parse("<stdin>", input, aLisp, &r)) {
+        /* on success evaluate the AST */
+        lval* x = lval_eval(e, lval_read(r.output));
+        lval_println(x);
+        lval_del(x);
+        mpc_ast_delete(r.output);
+      } else {
+        /* otherwise print the error */
+        mpc_err_print(r.error);
+        mpc_err_delete(r.error);
+      }
+
+      /* free retrieved input */
+      free(input);
     }
-
-    /* free retrieved input */
-    free(input);
   }
 
   /* clean up parsers */
