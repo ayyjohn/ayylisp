@@ -333,6 +333,7 @@ int lval_eq(lval* x, lval* y) {
     /* string lvals compare string values */
     case LVAL_ERR: return (strcmp(x->err, y->err) == 0);
     case LVAL_SYM: return (strcmp(x->sym, y->sym) == 0);
+    case LVAL_STR: return (strcmp(x->str, y->str) == 0);
 
     /* for functions, compare builtin if builtin, otherwise compare formals and args individually */
     case LVAL_FUN:
