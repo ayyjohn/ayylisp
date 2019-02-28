@@ -298,6 +298,18 @@ void lval_expr_print(lval* v, char open, char close) {
   putchar(close);
 }
 
+/* how to print a string lval, ensures characters are escaped correctly */
+void lval_print_str(lval* v) {
+  char* escaped = malloc(strlen(v->str) + 1);
+  strcpy(escaped, v->str);
+  escaped = mpcf_escape(escaped);
+  /* print the lval string field between quotes */
+  printf("\"%s\"", escaped);
+
+  /* cleanup */
+  free(escaped);
+}
+
 /* how to print an lval. for s-expr and q-expr recursively call
    to print out all lvals nested in the cell */
 void lval_print(lval* v) {
@@ -313,6 +325,7 @@ void lval_print(lval* v) {
     case LVAL_NUM:   printf("%li", v->num); break;
     case LVAL_ERR:   printf("Error: %s", v->err); break;
     case LVAL_SYM:   printf("%s", v->sym); break;
+    case LVAL_STR:   lval_print_str(v); break;
     case LVAL_SEXPR: lval_expr_print(v, '(', ')'); break;
     case LVAL_QEXPR: lval_expr_print(v, '{', '}'); break;
   }
