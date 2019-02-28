@@ -212,7 +212,7 @@ lval* lval_copy(lval* v) {
     /* for non-nested lval, just copy contents directly */
     case LVAL_NUM: x->num = v->num; break;
 
-    /* copy string lvals with strcpy */
+    /* copy string-containing lvals with strcpy */
     case LVAL_ERR:
       x->err = malloc(strlen(v->err) + 1);
       strcpy(x->err, v->err); break;
