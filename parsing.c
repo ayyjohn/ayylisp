@@ -1006,27 +1006,29 @@ lval* lval_read(mpc_ast_t* t) {
 
 int main(int argc, char** argv) {
   /* create parsers */
-  mpc_parser_t* Number = mpc_new("number");
-  mpc_parser_t* Symbol = mpc_new("symbol");
-  mpc_parser_t* String = mpc_new("string");
-  mpc_parser_t* Sexpr  = mpc_new("sexpr");
-  mpc_parser_t* Qexpr  = mpc_new("qexpr");
-  mpc_parser_t* Expr   = mpc_new("expr");
-  mpc_parser_t* aLisp  = mpc_new("aLisp");
+  mpc_parser_t* Number  = mpc_new("number");
+  mpc_parser_t* Symbol  = mpc_new("symbol");
+  mpc_parser_t* String  = mpc_new("string");
+  mpc_parser_t* Comment = mpc_new("comment");
+  mpc_parser_t* Sexpr   = mpc_new("sexpr");
+  mpc_parser_t* Qexpr   = mpc_new("qexpr");
+  mpc_parser_t* Expr    = mpc_new("expr");
+  mpc_parser_t* aLisp   = mpc_new("aLisp");
 
   /* define the parsers with the following language */
   mpca_lang(MPCA_LANG_DEFAULT,
-  "                                                        \
-    number : /-?[0-9]+/ ;                                  \
-    symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/ ;            \
-    string : /\"(\\\\.|[^\"])*\"/ ;                        \
-    sexpr  : '(' <expr>* ')' ;                             \
-    qexpr  : '{' <expr>* '}' ;                             \
-    expr   : <number> | <symbol> | <string>                \
-                      | <sexpr>  | <qexpr> ;               \
-    aLisp  : /^/ <expr>* /$/ ;                             \
+  "                                                         \
+    number  : /-?[0-9]+/ ;                                  \
+    symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/ ;            \
+    string  : /\"(\\\\.|[^\"])*\"/ ;                        \
+    comment : /;[^\\r\\n]*/ ;                               \
+    sexpr   : '(' <expr>* ')' ;                             \
+    qexpr   : '{' <expr>* '}' ;                             \
+    expr    : <number>  | <symbol> | <string>               \
+            | <comment> | <sexpr>  | <qexpr> ;              \
+    aLisp  : /^/ <expr>* /$/ ;                              \
   ",
-  Number, Symbol, String, Sexpr, Qexpr, Expr, aLisp);
+  Number, Symbol, String, Comment, Sexpr, Qexpr, Expr, aLisp);
   /* print version and instructions */
   puts("lisp: by ayyjohn");
   puts("aLisp Version 0.0.0.0.14");
@@ -1065,6 +1067,8 @@ int main(int argc, char** argv) {
   }
 
   /* clean up parsers */
-  mpc_cleanup(7, Number, Symbol, String, Sexpr, Qexpr, Expr, aLisp);
+  mpc_cleanup(8,
+              Number, Symbol, String, Comment,
+              Sexpr, Qexpr, Expr, aLisp);
   return 0;
 }
