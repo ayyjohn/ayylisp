@@ -962,12 +962,27 @@ lval* lval_read_num(mpc_ast_t* t) {
   return errno != ERANGE ? lval_num(x) : lval_err("invalid number");
 }
 
+/* defines how to read a string to convert to an lval */
+lval* lval_read_str(mpc_ast_t* t) {
+  /* cut off the final quote character */
+  t->contents[strlen(t->contents)-1] = '\0';
+  /* copy all but the first quote character */
+  char* unescaped = malloc(strlen(t->contents+1)+1);
+  strcpy(unescaped, t->contents+1);
+  unescaped = mpcf_unescape(unescaped);
+  lval* str = lval_str(unescaped);
+
+  free(unescaped);
+  return str;
+}
+
 /* method to define how to read different inputs as
    determined by the grammar parsing */
 lval* lval_read(mpc_ast_t* t) {
   /* if symbol or number return lval of that type */
   if (strstr(t->tag, "number")) { return lval_read_num(t); }
   if (strstr(t->tag, "symbol")) { return lval_sym(t->contents); }
+  if (strstr(t->tag, "string")) { return lval_read_str(t); }
 
   /* if root, or s-expr then create an empty list */
   lval* x = NULL;
