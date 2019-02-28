@@ -1029,7 +1029,7 @@ int main(int argc, char** argv) {
   Number, Symbol, String, Sexpr, Qexpr, Expr, aLisp);
   /* print version and instructions */
   puts("lisp: by ayyjohn");
-  puts("aLisp Version 0.0.0.0.13");
+  puts("aLisp Version 0.0.0.0.14");
   puts("Press Ctrl+c to Exit\n");
 
   /* set up environment */
