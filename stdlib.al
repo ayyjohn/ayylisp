@@ -74,3 +74,20 @@
     {nil}
     {join (head l) (take (- n 1) (tail l))}
 })
+
+; drop the first n items from a list
+(fun {drop n l} {
+  if (== n 0)
+    {l}
+    {drop (- n 1) (tail l)}
+})
+
+; split a list at index n
+(fun {split n l} {list (take n l) (drop n l)})
+
+; checks for element x's inclusion in the list
+(fun {contains? x l} {
+  if (== l nil)
+    {false}
+    {if (== x (first l)) {true} {contains? x (tail l)}}
+})
