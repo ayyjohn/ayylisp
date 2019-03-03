@@ -91,3 +91,11 @@
     {false}
     {if (== x (first l)) {true} {contains? x (tail l)}}
 })
+
+; apply function to each item in list
+(fun {map f l} {
+  if (== l nil)
+    {nil}
+    {join (list (f (first l))) (map f (tail l))}
+})
+
