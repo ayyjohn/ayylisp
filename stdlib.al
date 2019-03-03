@@ -86,10 +86,10 @@
 (fun {split n l} {list (take n l) (drop n l)})
 
 ; checks for element x's inclusion in the list
-(fun {contains? x l} {
+(fun {contains x l} {
   if (== l nil)
     {false}
-    {if (== x (first l)) {true} {contains? x (tail l)}}
+    {if (== x (first l)) {true} {contains x (tail l)}}
 })
 
 ; apply function to each item in list
@@ -98,4 +98,3 @@
     {nil}
     {join (list (f (first l))) (map f (tail l))}
 })
-
