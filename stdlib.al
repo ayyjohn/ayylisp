@@ -53,7 +53,7 @@
 
 ; get list length
 (fun {len l} {
-  if (== 1 nil)
+  if (== l nil)
     {0}
     {+ 1 (len (tail l))}
 })
