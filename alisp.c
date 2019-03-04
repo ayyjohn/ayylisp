@@ -688,7 +688,7 @@ lval* builtin_var(lenv* e, lval* a, char* func) {
      inputs, where the -1 comes from removing the
      method name */
   LASSERT(a, (syms->count == a->count-1),
-          "function '%s' wrong number of arguments"
+          "function '%s' passed wrong number of arguments"
           "got %i, expected %i",
           func, a->count-1, syms->count);
 
