@@ -748,7 +748,6 @@ lval* builtin_gt(lenv* e, lval* a) {
   return builtin_ord(e, a, ">");
 }
 
-
 lval* builtin_lt(lenv* e, lval* a) {
   return builtin_ord(e, a, "<");
 }
@@ -1167,7 +1166,8 @@ int main(int argc, char** argv) {
       if (x->type == LVAL_ERR) { lval_println(x); }
       lval_del(x);
     }
-}
+  }
+  lenv_del(e);
   /* clean up parsers */
   mpc_cleanup(8,
               Number, Symbol, String, Comment,
