@@ -47,9 +47,9 @@
 (fun {comp f g x} {f (g x)})
 
 ; convenience methods for item access
-(fun {first l} {eval (head l) })
-(fun {second l} {eval (head (tail l)) })
-(fun {third l} {eval (head (tail (tail l))) })
+(fun {first l}  { eval (head l) })
+(fun {second l} { eval (head (tail l)) })
+(fun {third l}  { eval (head (tail (tail l))) })
 
 ; get list length
 (fun {len l} {
