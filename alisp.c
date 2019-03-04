@@ -667,18 +667,18 @@ lval* builtin_div(lenv* e, lval* a) {
   return builtin_op(e, a, "/");
 }
 
-/* method to add a new function to the environment */
+/* method to add a new variable to the environment */
 lval* builtin_var(lenv* e, lval* a, char* func) {
   /* if input isn't a q-expression the compiler will attempt
      to evaluate it immediately, so confirm input is q-expression */
-  LASSERT_TYPE("def", a, 0, LVAL_QEXPR);
+  LASSERT_TYPE(func, a, 0, LVAL_QEXPR);
 
   /* after definition, must be followed by a symbol list */
   lval* syms = a->cell[0];
 
   /* ensure all elements in first symbol list are symbols */
   for (int i = 0; i < syms->count; i++) {
-    LASSERT(a, syms->cell[i]->type == LVAL_SYM,
+    LASSERT(a, (syms->cell[i]->type == LVAL_SYM),
             "function '%s' cannot define non-symbol"
             "got %s, expected %s",
             func, ltype_name(LVAL_SYM), ltype_name(syms->cell[i]->type));
@@ -687,7 +687,7 @@ lval* builtin_var(lenv* e, lval* a, char* func) {
   /* ensure that the method receives count-1
      inputs, where the -1 comes from removing the
      method name */
-  LASSERT(a, syms->count == a->count-1,
+  LASSERT(a, (syms->count == a->count-1),
           "function '%s' passed too many arguments for symbols. "
           "got %i, expected %i",
           func, a->count-1, syms->count);
