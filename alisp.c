@@ -468,6 +468,7 @@ lval* lenv_get(lenv* e, lval* k) {
   }
 }
 
+
 /* method to put a new variable definition into the local environment */
 void lenv_put(lenv* e, lval* k, lval* v) {
   /* if the current variable name is already defined, overwrite
@@ -679,7 +680,7 @@ lval* builtin_var(lenv* e, lval* a, char* func) {
   /* ensure all elements in first symbol list are symbols */
   for (int i = 0; i < syms->count; i++) {
     LASSERT(a, (syms->cell[i]->type == LVAL_SYM),
-            "function '%s' cannot define non-symbol"
+            "function '%s' cannot define non-symbol. "
             "got %s, expected %s",
             func, ltype_name(LVAL_SYM), ltype_name(syms->cell[i]->type));
   }
@@ -688,7 +689,7 @@ lval* builtin_var(lenv* e, lval* a, char* func) {
      inputs, where the -1 comes from removing the
      method name */
   LASSERT(a, (syms->count == a->count-1),
-          "function '%s' passed wrong number of arguments"
+          "function '%s' passed wrong number of arguments. "
           "got %i, expected %i",
           func, a->count-1, syms->count);
 
