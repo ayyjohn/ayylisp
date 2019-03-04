@@ -1124,7 +1124,10 @@ int main(int argc, char** argv) {
   if (argc == 1) {
     /* infinite repl loop */
 
-    builtin_load(e, "stdlib.al");
+    /* load standard library */
+    lval* x = builtin_load(e, lval_add(lval_sexpr(), lval_str("stdlib.al")));
+    if (x->type == LVAL_ERR) { puts("could not load standard library"); }
+    lval_del(x);
     while (1) {
 
       /* prompt user */
