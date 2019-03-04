@@ -1123,6 +1123,8 @@ int main(int argc, char** argv) {
   /* if just aLisp is invoked */
   if (argc == 1) {
     /* infinite repl loop */
+
+    builtin_load(e, "stdlib.al");
     while (1) {
 
       /* prompt user */
